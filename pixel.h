@@ -30,13 +30,14 @@ unsigned int rgb_combine(
 }
 
 void pixel_set(int x, int y, unsigned int color) {
-	ASSERT(
-		x >= 0 &&
+	if(
+		!(x >= 0 &&
 		y >= 0 &&
 		x < SCREEN_WIDTH &&
-		y < SCREEN_HEIGHT,
-		"x and y are out of bounds %d, %d", x, y
-	);
+		y < SCREEN_HEIGHT)
+	) {
+		return;
+	}
 
 	// SDL2 starts from the bottom to the top.
 	// so setting y "upside down" is needed.

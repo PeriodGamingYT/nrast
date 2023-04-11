@@ -33,24 +33,6 @@ num slope_vec(vec2_t a, vec2_t b) {
 	return (b.y - a.y) / (b.x - a.x);
 }
 
-// bad code TODO
-vec2_t point_at_y(vec2_t a, vec2_t b, num y) {
-	if(a.y > b.y) {
-		vec2_t temp = a;
-		a = b;
-		b = temp;
-	}
-	
-	num slope = slope_vec(a, b);
-	num x = (y - a.y) / slope;
-	vec2_t result = {
-		a.x + (slope * x),
-		y
-	};
-
-	return result;
-}
-
 void pixel_set_vec2(vec2_t x, unsigned int color) {
 	pixel_set((int) x.x, (int) x.y, color);
 }
@@ -142,23 +124,78 @@ void pixel_set_tri(tri2_t x) {
 	pixel_set_vec2(x.c, rgb_combine(0, 0, 255));
 }
 
-void tri_draw(tri2_t tri, unsigned int color) {
-	if(
-		tri.a.y == tri.b.y &&
-		tri.b.y == tri.c.y
-	) {
+void bottom_flat_tri_draw(tri2_t tri, unsigned int color) {
+	num inv_slope_1 = (tri.b.x - tri.a.x) / (tri.b.y - tri.a.y);
+	num inv_slope_2 = (tri.c.x - tri.a.x) / (tri.c.y - tri.a.y);
+	num cur_x_1 = tri.a.x;
+	num cur_x_2 = tri.a.x;
+	for(int y = tri.a.y; y <= tri.b.y; y++) {
 		horiz_line(
-			tri.a.y,
-			TRI_REDUCE_COORD(tri, MIN, x),
-			TRI_REDUCE_COORD(tri, MAX, x),
+			y,
+			(int) cur_x_1,
+			(int) cur_x_2 + 1,
 			color
 		);
 
+		cur_x_1 += inv_slope_1;
+		cur_x_2 += inv_slope_2;
+	}
+}
+
+void top_flat_tri_draw(tri2_t tri, unsigned int color) {
+	num inv_slope_1 = (tri.a.x - tri.b.x) / (tri.a.y - tri.b.y);
+	num inv_slope_2 = (tri.a.x - tri.c.x) / (tri.a.y - tri.c.y);
+	num cur_x_1 = tri.a.x;
+	num cur_x_2 = tri.a.x;
+	for(int y = tri.a.y; y >= tri.b.y; y--) {
+		horiz_line(
+			y,
+			(int) cur_x_1,
+			(int) cur_x_2 + 1,
+			color
+		);
+
+		cur_x_1 -= inv_slope_1;
+		cur_x_2 -= inv_slope_2;
+	}
+}
+
+void tri_draw(tri2_t bad_tri, unsigned int color) {
+	tri2_t tri = correct_tri(bad_tri);
+	if(tri.b.y == tri.c.y) {
+		bottom_flat_tri_draw(tri, color);
 		return;
 	}
 
-	tri2_t corrected = correct_tri(tri);
-	
+	if(tri.a.y > tri.b.y) {
+		top_flat_tri_draw(tri, color);
+		return;
+	}
+
+	vec2_t mid_point = {
+		tri.a.x + (int)( 
+			(
+				(num)(tri.b.y - tri.a.y) / 
+				(num)(tri.c.y - tri.a.y)
+			) * (tri.c.x - tri.a.x)
+		),
+		tri.b.y
+	};
+
+	tri2_t bottom_flat = {
+		tri.a,
+		tri.b,
+		mid_point
+	};
+
+	bottom_flat_tri_draw(bottom_flat, color);
+	tri2_t top_flat = {
+		tri.c,
+		tri.b,
+		mid_point
+	};
+
+	top_flat_tri_draw(top_flat, color);
 }
 
 #endif
