@@ -48,14 +48,6 @@ void render() {
 	};
 
 	tri_draw(tri, rgb_combine(255, 255, 255));
-
-	tri2_t other_tri = {
-		{ 80, 70 },
-		{ 90, 60 },
-		{ 100, 60 }
-	};
-
-	equal_tri_draw(other_tri, rgb_combine(255, 255, 255));
 }
 
 void step_sdl() {

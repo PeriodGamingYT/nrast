@@ -8,6 +8,7 @@ typedef float num;
 #define PRINT_INT(x) \
 	printf("%d\n", x)
 
+// todo, rewrite code AAAAA
 typedef struct {
 	num x, y;
 } vec2_t;
@@ -73,32 +74,6 @@ void horiz_line(
 
 #define ABS(x) \
 	((x) < 0 ? (-(x)) : (x))
-
-void basic_tri_draw(
-	vec2_t start,
-	vec2_t slope,
-	num stop,
-	unsigned int color
-) {
-	int inc = bool_to_pos_neg((int) start.y < (int) stop);
-	for(int i = (int) start.y; i != (int) stop; i += inc) {
-		int temp = ABS(i - start.y);
-		horiz_line(
-			i, 
-			(temp * slope.x) + start.x,
-			(temp * slope.y) + start.x,
-			color
-		);
-	}
-
-	int temp = ABS(stop - start.y);
-	horiz_line(
-		stop, 
-		(temp * slope.x) + start.x, 
-		(temp * slope.y) + start.x, 
-		color
-	);
-}
 
 typedef struct {
 	vec2_t a, b, c;
@@ -167,33 +142,6 @@ void pixel_set_tri(tri2_t x) {
 	pixel_set_vec2(x.c, rgb_combine(0, 0, 255));
 }
 
-// bad code TODO
-void equal_tri_draw(tri2_t tri, unsigned int color) {
-	tri2_t corrected = correct_tri(tri);
-	vec2_t slope = {
-		slope_vec(corrected.a, corrected.b),
-		slope_vec(corrected.a, corrected.c)
-	};
-
-	num corrected_y = corrected.b.y;
-	if(corrected.a.y > corrected.b.y) {
-		slope.y = slope_vec(corrected.b, corrected.a);
-		slope.x = slope_vec(corrected.c, corrected.a);
-		corrected_y = corrected.a.y;
-	}
-
-	basic_tri_draw(
-		corrected.a,
-		slope,
-		corrected_y,
-		color
-	);
-
-	#ifdef COMMON_DEBUG_MODE
-		pixel_set_tri(corrected);
-	#endif
-}
-
 void tri_draw(tri2_t tri, unsigned int color) {
 	if(
 		tri.a.y == tri.b.y &&
@@ -210,35 +158,7 @@ void tri_draw(tri2_t tri, unsigned int color) {
 	}
 
 	tri2_t corrected = correct_tri(tri);
-	if(corrected.b.y == corrected.c.y) {
-		equal_tri_draw(corrected, color);
-		return;
-	}
-
-	tri2_t top_split = {
-		EXPAND_VEC2(corrected.a),
-		point_at_y(
-			corrected.a,
-			corrected.c,
-			corrected.b.y
-		),
-
-		EXPAND_VEC2(corrected.b)
-	};
-
-	equal_tri_draw(top_split, color);
-	tri2_t bottom_split = {
-		EXPAND_VEC2(corrected.c),
-		point_at_y(
-			corrected.a,
-			corrected.c,
-			corrected.b.y
-		),
-		
-		EXPAND_VEC2(corrected.b)
-	};
-
-	equal_tri_draw(bottom_split, color);
+	
 }
 
 #endif
