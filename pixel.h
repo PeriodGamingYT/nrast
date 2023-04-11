@@ -1,0 +1,48 @@
+#ifndef __PIXEL_H
+#define __PIXEL_H
+#include <stdio.h>
+#include <stdint.h>
+#include <SDL2/SDL.h>
+#include "common.h"
+#define ASSERT(x, ...) \
+	if(!(x)) { \
+		fprintf(stderr, __VA_ARGS__); \
+		exit(1); \
+	}
+	
+// shamelessly stolen from jdh/jdah.
+#define SCREEN_WIDTH 384
+#define SCREEN_HEIGHT 216
+struct {
+	SDL_Window *window;
+	SDL_Texture *texture;
+	SDL_Renderer *renderer;
+	unsigned int *data;
+	int quit;
+} state;
+
+unsigned int rgb_combine(
+	unsigned char r,
+	unsigned char g,
+	unsigned char b
+) {
+	return r | (g << 8) | (b << 16);
+}
+
+void pixel_set(int x, int y, unsigned int color) {
+	ASSERT(
+		x >= 0 &&
+		y >= 0 &&
+		x < SCREEN_WIDTH &&
+		y < SCREEN_HEIGHT,
+		"x and y are out of bounds %d, %d", x, y
+	);
+
+	// SDL2 starts from the bottom to the top.
+	// so setting y "upside down" is needed.
+	state.data[
+		(SCREEN_HEIGHT - y - 1) * SCREEN_WIDTH + x
+	] = color;
+}
+
+#endif
