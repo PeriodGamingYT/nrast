@@ -1,4 +1,4 @@
-#include "tri.h"
+#include "three_d.h"
 #define SDL_ASSERT(x, y) \
 	ASSERT(x, "%s: %s\n", y, SDL_GetError())
 
@@ -36,18 +36,27 @@ void create_sdl() {
 	state.data = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * 4);
 }
 
+// yes this is a hack, lol.
+int is_computed = 0;
+tri2_t draw_tri;
 void render() {
 
 	// put your rendering code here.
 	// little test below, that's all.
 	// render_func_here <-- for text editor, makes it easy to find this function.
-	tri2_t tri = {
-		{ 30, 10 },
-		{ 10, 30 },
-		{ 40, 50 }
-	};
+	if(!is_computed) {
+		tri3_t tri = {
+			{ 0, 1, 1 },
+			{ 0, 0, 1 },
+			{ 1, 1, 1 }
+		};
+	
+		mat_t proj = make_mat_proj(100);
+		draw_tri = tri3_proj(tri, &proj);
+		is_computed = 1;
+	}
 
-	tri_draw(tri, rgb_combine(255, 255, 255));
+	tri_draw(draw_tri, rgb_combine(255, 255, 255));
 }
 
 void step_sdl() {

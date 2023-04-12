@@ -8,7 +8,6 @@ typedef float num;
 #define PRINT_INT(x) \
 	printf("%d\n", x)
 
-// todo, rewrite code AAAAA
 typedef struct {
 	num x, y;
 } vec2_t;
@@ -21,16 +20,6 @@ typedef struct {
 
 int bool_to_pos_neg(int x) {
 	return (x * 2) - 1;
-}
-
-num slope_vec(vec2_t a, vec2_t b) {
-	if(a.y > b.y) {
-		vec2_t temp = a;
-		a = b;
-		b = temp;
-	}
-	
-	return (b.y - a.y) / (b.x - a.x);
 }
 
 void pixel_set_vec2(vec2_t x, unsigned int color) {
@@ -53,9 +42,6 @@ void horiz_line(
 		pixel_set(i, (int) start_y, color);
 	}
 }
-
-#define ABS(x) \
-	((x) < 0 ? (-(x)) : (x))
 
 typedef struct {
 	vec2_t a, b, c;
@@ -108,15 +94,6 @@ tri2_t correct_tri(tri2_t tri) {
 
 	return tri;
 }
-
-#define MIN(x, y) \
-	((x) < (y) ? (x) : (y))
-
-#define MAX(x, y) \
-	((x) > (y) ? (x) : (y))
-
-#define TRI_REDUCE_COORD(_x, _y, _z) \
-	_y(_x.a._z, _y(_x.b._z, _x.c._z))
 
 void pixel_set_tri(tri2_t x) {
 	pixel_set_vec2(x.a, rgb_combine(255, 0, 0));
@@ -196,6 +173,9 @@ void tri_draw(tri2_t bad_tri, unsigned int color) {
 	};
 
 	top_flat_tri_draw(top_flat, color);
+	#ifdef COMMON_DEBUG_MODE
+		pixel_set_tri(tri);
+	#endif
 }
 
 #endif
