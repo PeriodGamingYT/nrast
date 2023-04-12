@@ -67,8 +67,34 @@ typedef struct {
 #define NEED_SWAP_TRI2(_x) \
 	(_x) ? !is_upside_down : is_upside_down
 
-tri2_t correct_tri(tri2_t tri) {
+#define MIN(_x, _y) \
+	((_x) < (_y) ? (_x) : (_y))
 
+#define MAX(_x, _y) \
+	((_x) > (_y) ? (_x) : (_y))
+
+#define CLAMP_WIDTH(_x) \
+	MAX(0, MIN(_x, SCREEN_WIDTH))
+
+#define CLAMP_HEIGHT(_x) \
+	MAX(0, MIN(_x, SCREEN_HEIGHT))
+
+#define VEC2_OP_PERFORM(_x, _y, _z) \
+	_x.x = _y(_x.x); \
+	_x.y = _z(_x.y)
+
+#define TRI2_OP_PERFORM(_x, _y, _z) \
+	VEC2_OP_PERFORM(_x.a, _y, _z); \
+	VEC2_OP_PERFORM(_x.b, _y, _z); \
+	VEC2_OP_PERFORM(_x.c, _y, _z)
+
+tri2_t correct_tri(tri2_t tri) {
+	TRI2_OP_PERFORM(
+		tri, 
+		CLAMP_WIDTH, 
+		CLAMP_HEIGHT
+	);
+	
 	// dealing with an edge case. warning: this is code 
 	// is vomit inducing. you have been warned.
 	int is_upside_down = 0;

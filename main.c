@@ -1,4 +1,4 @@
-#include "three_d.h"
+#include "mesh.h"
 #define SDL_ASSERT(x, y) \
 	ASSERT(x, "%s: %s\n", y, SDL_GetError())
 
@@ -38,25 +38,17 @@ void create_sdl() {
 
 // yes this is a hack, lol.
 int is_computed = 0;
-tri2_t draw_tri;
 void render() {
 
 	// put your rendering code here.
 	// little test below, that's all.
 	// render_func_here <-- for text editor, makes it easy to find this function.
 	if(!is_computed) {
-		tri3_t tri = {
-			{ 0, 1, 1 },
-			{ 0, 0, 1 },
-			{ 1, 1, 1 }
-		};
-	
-		mat_t proj = make_mat_proj(100);
-		draw_tri = tri3_proj(tri, &proj);
+		mat_t proj = make_mat_proj();
+		mesh_t cube = make_cube_mesh();
+		mesh_draw(&cube, &proj, rgb_combine(255, 255, 255));
 		is_computed = 1;
 	}
-
-	tri_draw(draw_tri, rgb_combine(255, 255, 255));
 }
 
 void step_sdl() {
@@ -69,7 +61,6 @@ void step_sdl() {
 		}
 	}
 
-	memset(state.data, 0, SCREEN_WIDTH * SCREEN_HEIGHT * 4);
 	render();
 	SDL_UpdateTexture(
 		state.texture,
