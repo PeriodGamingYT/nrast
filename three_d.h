@@ -57,33 +57,69 @@ vec3_t mul_mat(
 }
 
 #undef M
-#define M result.m
-mat_t make_mat_proj() {
-	mat_t result;
-
-	// might be redundant, not too sure though.
+void clean_mat(mat_t *mat) {
 	for(int i = 0; i < 4; i++) {
 		for(int j = 0; j < 4; j++) {
-			result.m[i][j] = 0;
+			mat->m[i][j] = 0;
 		}
 	}
+}
 
+mat_t make_mat_proj() {
+	mat_t result;
+	clean_mat(&result);
+	
 	// https://github.com/OneLoneCoder/Javidx9/blob/master/ConsoleGameEngine/BiggerProjects/Engine3D/OneLoneCoder_olcEngine3D_Part1.cpp
-	float fNear = 0.5f;
-	float fFar = 1000.0f;
-	float fFov = 90.0f;
-	float fAspectRatio = (float) SCREEN_HEIGHT / (float) SCREEN_WIDTH;
-	float fFovRad = 1.0f / tanf(fFov * 0.5f / 180.0f * 3.14159f);
-	M [0][0] = fAspectRatio * fFovRad;
-	M [1][1] = fFovRad;
-	M [2][2] = fFar / (fFar - fNear);
-	M [3][2] = (-fFar * fNear) / (fFar - fNear);
-	M [2][3] = 1.0f;
-	M [3][3] = 0.0f;
+	num near = 0.5;
+	num far = 1000.0;
+	num fov = 90.0;
+	num aspect_ratio = (num) SCREEN_HEIGHT / (num) SCREEN_WIDTH;
+	num fov_rad = 1.0f / tanf(fov * 0.5 / 180.0 * 3.14159);
+	result.m[0][0] = aspect_ratio * fov_rad;
+	result.m[1][1] = fov_rad;
+	result.m[2][2] = far / (far - near);
+	result.m[3][2] = (-far * near) / (far - near);
+	result.m[2][3] = 1.0;
+	result.m[3][3] = 0.0;
 	return result;
 }
 
-#undef M
+mat_t mat_rot_x(num theta) {
+	mat_t result;
+	clean_mat(&result);
+	result.m[0][0] = 1.0;
+	result.m[1][1] = cosf(theta * 0.5);
+	result.m[1][2] = sinf(theta * 0.5);
+	result.m[2][1] = -sinf(theta * 0.5);
+	result.m[2][2] = cosf(theta * 0.5);
+	result.m[3][3] = 1.0;
+	return result;
+}
+
+mat_t mat_rot_y(num theta) {
+	mat_t result;
+	clean_mat(&result);
+	result.m[0][0] = cosf(theta);
+	result.m[0][2] = sinf(theta);
+	result.m[2][0] = -sinf(theta);
+	result.m[1][1] = 1.0;
+	result.m[2][2] = cosf(theta);
+	result.m[3][3] = 1;
+	return result;
+}
+
+mat_t mat_rot_z(num theta) {
+	mat_t result;
+	clean_mat(&result);
+	result.m[0][0] = cosf(theta);
+	result.m[0][1] = sinf(theta);
+	result.m[1][0] = -sinf(theta);
+	result.m[1][1] = cosf(theta);
+	result.m[2][2] = 1.0;
+	result.m[3][3] = 1.0;
+	return result;
+}
+
 tri2_t tri3_proj(
 	tri3_t tri,
 	mat_t *proj

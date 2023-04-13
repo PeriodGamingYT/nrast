@@ -36,19 +36,25 @@ void create_sdl() {
 	state.data = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * 4);
 }
 
-// yes this is a hack, lol.
-int is_computed = 0;
+mesh_t cube;
+mat_t proj;
+// num old_time = 0;
+// num new_time = 0;
+// num elapsed_time = 0;
 void render() {
-
 	// put your rendering code here.
 	// little test below, that's all.
 	// render_func_here <-- for text editor, makes it easy to find this function.
-	if(!is_computed) {
-		mat_t proj = make_mat_proj();
-		mesh_t cube = make_cube_mesh();
-		mesh_draw(&cube, &proj, rgb_combine(255, 255, 255));
-		is_computed = 1;
-	}
+	// new_time = SDL_GetTicks();
+	mesh_clean_slate(&cube);
+	// num frame_time = (new_time - old_time);
+	// elapsed_time += frame_time;
+	vec3_t rot = { 1, 0, 0 };
+	mesh_rot(&cube, rot);
+	vec3_t trans = { 0, 0, 3 };
+	mesh_trans(&cube, trans);
+	mesh_draw(&cube, &proj, rgb_combine(255, 255, 255));
+	// old_time = new_time;
 }
 
 void step_sdl() {
@@ -61,6 +67,7 @@ void step_sdl() {
 		}
 	}
 
+	memset(state.data, 0, SCREEN_WIDTH * SCREEN_HEIGHT * 4);
 	render();
 	SDL_UpdateTexture(
 		state.texture,
@@ -83,6 +90,7 @@ void step_sdl() {
 }
 
 void free_sdl() {
+	free_mesh(&cube);
 	free(state.data);
 	SDL_DestroyTexture(state.texture);
 	SDL_DestroyRenderer(state.renderer);
@@ -91,6 +99,8 @@ void free_sdl() {
 
 int main() {
 	create_sdl();
+	cube = make_cube_mesh();
+	proj = make_mat_proj();
 	MAIN_LOOP() {
 		step_sdl();
 	}
