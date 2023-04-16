@@ -1,3 +1,7 @@
+// just to let you know, in some drawing calls, there will be some artifacts.
+// i have chosen not to fix these. as they help make this rasterizer stand out.
+// plus, it already has an old school feel to it. 
+// so leaving some artifacts in the rasterizer will help make it feel even more old school.
 #include "mesh.h"
 #define SDL_ASSERT(x, y) \
 	ASSERT(x, "%s: %s\n", y, SDL_GetError())
@@ -6,7 +10,6 @@
 	while(!state.quit)
 
 void create_sdl() {
-	// again, stolen from jdh.
 	SDL_ASSERT(
 		!SDL_Init(SDL_INIT_VIDEO),
 		"can't init"
@@ -42,15 +45,20 @@ num old_time = 0;
 num new_time = 0;
 num elapsed_time = 0;
 void render() {
-	// put your rendering code here.
-	// little test below, that's all.
 	// render_func_here <-- for text editor, makes it easy to find this function.
 	new_time = SDL_GetTicks();
 	mesh_clean_slate(&cube);
 	num frame_time = (new_time - old_time);
 	elapsed_time += frame_time;
 	vec3_t trans = { 0, 0, 3 };
+
+	// dumb hack, will get rid of later when I want to move on 
+	// from this demo.
 	num slow_time = elapsed_time / 10.0;
+	if(slow_time > 20.0) {
+		elapsed_time = 0.0;
+	}
+	
 	vec3_t rot = { deg(slow_time), deg(slow_time), deg(slow_time) };
 	mesh_rot(&cube, rot);
 	mesh_trans(&cube, trans);
