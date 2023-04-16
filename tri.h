@@ -263,7 +263,7 @@ void tri_draw(tri2_t bad_tri, unsigned int color) {
 	#ifndef COMMON_DEBUG_MODE
 		bottom_flat_tri_draw(bottom_flat, color);
 		top_flat_tri_draw(top_flat, color);
-	#else COMMON_DEBUG_MODE
+	#else
 		line_tri(tri, color);
 		pixel_set_tri(tri);
 	#endif

@@ -9,8 +9,7 @@
 		fprintf(stderr, __VA_ARGS__); \
 		exit(1); \
 	}
-	
-// shamelessly stolen from jdh/jdah.
+
 #define SCREEN_WIDTH 384
 #define SCREEN_HEIGHT 216
 struct {
