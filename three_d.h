@@ -74,7 +74,7 @@ mat_t make_mat_proj() {
 	num far = 1000.0;
 	num fov = 90.0;
 	num aspect_ratio = (num) SCREEN_HEIGHT / (num) SCREEN_WIDTH;
-	num fov_rad = 1.0f / tanf(fov * 0.5 / 180.0 * 3.14159);
+	num fov_rad = 1.0 / tanf(fov * 0.5 / 180.0 * PI);
 	result.m[0][0] = aspect_ratio * fov_rad;
 	result.m[1][1] = fov_rad;
 	result.m[2][2] = far / (far - near);
@@ -134,7 +134,6 @@ tri2_t tri3_proj(
 		.c = EXPAND_VEC2(proj_tri.c),	
 	};
 
-	// this code is an eye-sore.
 	result.a.x++; result.a.y++;
 	result.b.x++; result.b.y++;
 	result.c.x++; result.c.y++;

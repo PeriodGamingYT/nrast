@@ -72,21 +72,9 @@ void mesh_draw(
 	VEC3_OP_PERFORM(_x.b, _y); \
 	VEC3_OP_PERFORM(_x.c, _y)
 
-void mesh_trans(
-	mesh_t *mesh,
-	vec3_t trans
-) {
+void mesh_trans(mesh_t *mesh, vec3_t trans) {
 	for(int i = 0; i < mesh->tris_length; i++) {
 		TRI3_OP_PERFORM(mesh->tris[i], + trans);
-	}
-}
-
-void mesh_scale(
-	mesh_t *mesh,
-	vec3_t scale
-) {
-	for(int i = 0; i < mesh->tris_length; i++) {
-		TRI3_OP_PERFORM(mesh->tris[i], * scale);
 	}
 }
 
@@ -95,25 +83,14 @@ void mesh_scale(
 	_x.b = mul_mat(_x.b, _y); \
 	_x.c = mul_mat(_x.c, _y)	
 
-void mesh_rot(
-	mesh_t *mesh,
-	vec3_t rot
-) {
+void mesh_rot(mesh_t *mesh, vec3_t rot) {
 	mat_t rot_x = mat_rot_x(rot.x);
 	mat_t rot_y = mat_rot_y(rot.y);
 	mat_t rot_z = mat_rot_z(rot.z);
 	for(int i = 0; i < mesh->tris_length; i++) {
-		if(rot.x > 0) {
-			TRI3_MAT_MUL(mesh->tris[i], &rot_x);
-		}
-
-		if(rot.y > 0) {
-			TRI3_MAT_MUL(mesh->tris[i], &rot_y);
-		}
-		
-		if(rot.z > 0) {
-			TRI3_MAT_MUL(mesh->tris[i], &rot_z);
-		}
+		TRI3_MAT_MUL(mesh->tris[i], &rot_z);
+		TRI3_MAT_MUL(mesh->tris[i], &rot_x);
+		TRI3_MAT_MUL(mesh->tris[i], &rot_y);
 	}
 }
 
