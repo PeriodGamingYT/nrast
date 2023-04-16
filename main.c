@@ -38,29 +38,24 @@ void create_sdl() {
 
 mesh_t cube;
 mat_t proj;
-// num old_time = 0;
-// num new_time = 0;
-// num elapsed_time = 0;
+num old_time = 0;
+num new_time = 0;
+num elapsed_time = 0;
 void render() {
 	// put your rendering code here.
 	// little test below, that's all.
 	// render_func_here <-- for text editor, makes it easy to find this function.
-	// new_time = SDL_GetTicks();
+	new_time = SDL_GetTicks();
 	mesh_clean_slate(&cube);
-	// num frame_time = (new_time - old_time);
-	// elapsed_time += frame_time;
-	// vec3_t rot = { 1, 0, 0 };
-	// tri3_t eg_tri = TRI3_PART(0, 0, 1, 1, 0, 0, 1, 1, 1);
-	// mat_t rot_x = mat_rot_x(PI * 2);
-	// TRI3_MAT_MUL(eg_tri, &rot_x);
-	// PRINT_TRI3(eg_tri);
-	// tri2_t draw_tri = tri3_proj(eg_tri, &proj);
-	// PRINT_TRI2(draw_tri);
-	// tri_draw(draw_tri, rgb_combine(255, 255, 255));
+	num frame_time = (new_time - old_time);
+	elapsed_time += frame_time;
 	vec3_t trans = { 0, 0, 3 };
+	num slow_time = elapsed_time / 10.0;
+	vec3_t rot = { deg(slow_time), deg(slow_time), deg(slow_time) };
+	mesh_rot(&cube, rot);
 	mesh_trans(&cube, trans);
 	mesh_draw(&cube, &proj, rgb_combine(255, 255, 255));
-	// old_time = new_time;
+	old_time = new_time;
 }
 
 void step_sdl() {

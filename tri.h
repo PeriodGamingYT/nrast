@@ -2,11 +2,11 @@
 #define __TRI_H
 #include "pixel.h"
 typedef float num;
-#define PRINT_NUM(x) \
-	printf("%f\n", x)
+#define PRINT_NUM(_x) \
+	printf("%f\n", _x)
 
-#define PRINT_INT(x) \
-	printf("%d\n", x)
+#define PRINT_INT(_x) \
+	printf("%d\n", _x)
 
 typedef struct {
 	num x, y;
@@ -43,18 +43,74 @@ void horiz_line(
 	}
 }
 
+// https://www.geeksforgeeks.org/bresenhams-line-generation-algorithm/
+#define SWAP_XY_VEC2(_x) \
+	temp = _x.x; \
+	_x.x = _x.y; \
+	_x.y = temp
+
+void line_part(
+	vec2_t start,
+	vec2_t end,
+	vec2_t delta,
+	num decide,
+	unsigned int color
+) {
+	num pk = 2 * delta.y - delta.x;
+	for(num i = 0; i <= delta.x; i++) {
+		start.x < end.x ? start.x++ : start.x--;
+		vec2_t temp_vec2 = start;
+		if(decide != 0) {
+			num temp;
+			SWAP_XY_VEC2(temp_vec2);
+		}
+		
+		if(pk < 0) {
+			pixel_set(temp_vec2.x, temp_vec2.y, color);
+			pk += 2 * delta.y;
+			continue;
+		}
+
+		start.y < end.y ? start.y++ : start.y--;
+		pixel_set(temp_vec2.x, temp_vec2.y, color);
+		pk += 2 * delta.y - 2 * delta.x;
+	}
+}
+
+#define ABS(_x) \
+	((_x) > 0 ? (_x) : (-(_x)))
+
+void line(
+	vec2_t start,
+	vec2_t end,
+	unsigned int color
+) {
+	vec2_t delta = {
+		ABS(end.x - start.x),
+		ABS(end.y - start.y)
+	};
+
+	num decide = 0;
+	if(delta.x < delta.y) {
+		num temp;
+		SWAP_XY_VEC2(start);
+		SWAP_XY_VEC2(end);
+		SWAP_XY_VEC2(delta);
+		decide = 1;
+	}
+
+	line_part(start, end, delta, decide, color);
+}
+
 typedef struct {
 	vec2_t a, b, c;
-
-// weird place to put a comment, lol.
-// TRIangle 2D Type
 } tri2_t;
 
-#define PRINT_TRI2(x) \
+#define PRINT_TRI2(_x) \
 	printf("tri2_t\n"); \
-	PRINT_VEC2(x.a); \
-	PRINT_VEC2(x.b); \
-	PRINT_VEC2(x.c);
+	PRINT_VEC2(_x.a); \
+	PRINT_VEC2(_x.b); \
+	PRINT_VEC2(_x.c);
 
 #define SWAP_TRI2(_x, _y, _z) \
 	vec2_t temp = _x._y; \
@@ -127,6 +183,13 @@ void pixel_set_tri(tri2_t x) {
 	pixel_set_vec2(x.c, rgb_combine(0, 0, 255));
 }
 
+void line_tri(tri2_t tri, unsigned int color) {
+	line(tri.a, tri.b, color);
+	line(tri.b, tri.c, color);
+	line(tri.c, tri.a, color);
+}
+
+// depending on your input the filled triangle will look out of whack. TODO
 void bottom_flat_tri_draw(tri2_t tri, unsigned int color) {
 	num inv_slope_1 = (tri.b.x - tri.a.x) / (tri.b.y - tri.a.y);
 	num inv_slope_2 = (tri.c.x - tri.a.x) / (tri.c.y - tri.a.y);
@@ -191,15 +254,17 @@ void tri_draw(tri2_t bad_tri, unsigned int color) {
 		mid_point
 	};
 
-	bottom_flat_tri_draw(bottom_flat, color);
 	tri2_t top_flat = {
 		tri.c,
 		tri.b,
 		mid_point
 	};
 
-	top_flat_tri_draw(top_flat, color);
-	#ifdef COMMON_DEBUG_MODE
+	#ifndef COMMON_DEBUG_MODE
+		bottom_flat_tri_draw(bottom_flat, color);
+		top_flat_tri_draw(top_flat, color);
+	#else COMMON_DEBUG_MODE
+		line_tri(tri, color);
 		pixel_set_tri(tri);
 	#endif
 }

@@ -1,5 +1,5 @@
 #ifndef THREE_D_H
-#define	THREE_D_H
+#define THREE_D_H
 #include "tri.h"
 #include <math.h>
 
@@ -47,7 +47,7 @@ vec3_t mul_mat(
 	result.y = M(x, 0, 1) + M(y, 1, 1) + M(z, 2, 1) + mat->m[3][1];
 	result.z = M(x, 0, 2) + M(y, 1, 2) + M(z, 2, 2) + mat->m[3][2];
 	num w = M(x, 0, 3) + M(y, 1, 3) + M(z, 2, 3) + mat->m[3][3];
-	if(w != 0) {
+	if(w != 0.0) {
 		result.x /= w;
 		result.y /= w;
 		result.z /= w;		
@@ -60,7 +60,7 @@ vec3_t mul_mat(
 void clean_mat(mat_t *mat) {
 	for(int i = 0; i < 4; i++) {
 		for(int j = 0; j < 4; j++) {
-			mat->m[i][j] = 0;
+			mat->m[i][j] = 0.0;
 		}
 	}
 }
@@ -69,29 +69,36 @@ mat_t make_mat_proj() {
 	mat_t result;
 	clean_mat(&result);
 	
-	// https://github.com/OneLoneCoder/Javidx9/blob/master/ConsoleGameEngine/BiggerProjects/Engine3D/OneLoneCoder_olcEngine3D_Part1.cpp
-	num near = 0.5;
-	num far = 1000.0;
+	// https://github.com/OneLoneCoder/Javidx9/blob/master/ConsoleGameEngine/BiggerProjects/Engine3D/OneLoneCoder_olcEngine3D_Part1.cpp <-- not me lol
+	// https://replit.com/@Arabica/3DEngine?v=1#script.js <-- hey that's me!
+	num near = 1;
+	num far = 100.0;
 	num fov = 90.0;
-	num aspect_ratio = (num) SCREEN_HEIGHT / (num) SCREEN_WIDTH;
 	num fov_rad = 1.0 / tanf(fov * 0.5 / 180.0 * PI);
+	num aspect_ratio = ((num)(SCREEN_HEIGHT) / (num)(SCREEN_WIDTH)) * fov_rad;
+	num q = far / (far - near);
 	result.m[0][0] = aspect_ratio * fov_rad;
 	result.m[1][1] = fov_rad;
-	result.m[2][2] = far / (far - near);
-	result.m[3][2] = (-far * near) / (far - near);
+	result.m[2][2] = q;
+	result.m[3][2] = -near * q;
 	result.m[2][3] = 1.0;
-	result.m[3][3] = 0.0;
+	return result;
+}
+
+num deg(num x) {
+	num result =  (x * PI) / 180.0;
 	return result;
 }
 
 mat_t mat_rot_x(num theta) {
 	mat_t result;
 	clean_mat(&result);
+	theta *= 0.5;
 	result.m[0][0] = 1.0;
-	result.m[1][1] = cosf(theta * 0.5);
-	result.m[1][2] = sinf(theta * 0.5);
-	result.m[2][1] = -sinf(theta * 0.5);
-	result.m[2][2] = cosf(theta * 0.5);
+	result.m[1][1] = cosf(theta);
+	result.m[1][2] = sinf(theta);
+	result.m[2][1] = -sinf(theta);
+	result.m[2][2] = cosf(theta);
 	result.m[3][3] = 1.0;
 	return result;
 }
