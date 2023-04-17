@@ -220,6 +220,8 @@ void bottom_flat_tri_draw(tri2_t tri, unsigned int color) {
 	}
 }
 
+// sometimes triangles underdraw, or not at all.
+// not too sure why. maybe i'll fix it. TODO
 void top_flat_tri_draw(tri2_t tri, unsigned int color) {
 	num inv_slope_1 = (tri.a.x - tri.b.x) / (tri.a.y - tri.b.y);
 	num inv_slope_2 = (tri.a.x - tri.c.x) / (tri.a.y - tri.c.y);
