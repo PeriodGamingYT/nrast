@@ -6,9 +6,6 @@
 #define SDL_ASSERT(x, y) \
 	ASSERT(x, "%s: %s\n", y, SDL_GetError())
 
-#define MAIN_LOOP() \
-	while(!state.quit)
-
 void create_sdl() {
 	SDL_ASSERT(
 		!SDL_Init(SDL_INIT_VIDEO),
@@ -109,7 +106,7 @@ int main() {
 	create_sdl();
 	cube = make_cube_mesh();
 	proj = make_mat_proj();
-	MAIN_LOOP() {
+	while(!state.quit) {
 		step_sdl();
 	}
 
