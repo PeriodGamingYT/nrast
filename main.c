@@ -55,7 +55,7 @@ void render() {
 	// dumb hack, will get rid of later when I want to move on 
 	// from this demo.
 	num slow_time = elapsed_time / 10.0;
-	if(slow_time > 20.0) {
+	if(slow_time > 1000.0) {
 		elapsed_time = 0.0;
 	}
 	
