@@ -20,7 +20,7 @@ struct {
 	int quit;
 } state;
 
-unsigned int rgb_combine(
+unsigned int rgb(
 	unsigned char r,
 	unsigned char g,
 	unsigned char b

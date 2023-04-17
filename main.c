@@ -45,7 +45,6 @@ num old_time = 0;
 num new_time = 0;
 num elapsed_time = 0;
 void render() {
-	// render_func_here <-- for text editor, makes it easy to find this function.
 	new_time = SDL_GetTicks();
 	mesh_clean_slate(&cube);
 	num frame_time = (new_time - old_time);
@@ -62,7 +61,7 @@ void render() {
 	vec3_t rot = { deg(slow_time), deg(slow_time), deg(slow_time) };
 	mesh_rot(&cube, rot);
 	mesh_trans(&cube, trans);
-	mesh_draw(&cube, &proj, rgb_combine(255, 255, 255));
+	mesh_draw(&cube, &proj, rgb(255, 255, 255));
 	old_time = new_time;
 }
 

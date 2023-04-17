@@ -144,6 +144,9 @@ typedef struct {
 	VEC2_OP_PERFORM(_x.b, _y, _z); \
 	VEC2_OP_PERFORM(_x.c, _y, _z)
 
+#define FLOOR_TRI(_x) \
+	(num)((int)(_x))
+
 tri2_t correct_tri(tri2_t tri) {
 	TRI2_OP_PERFORM(
 		tri, 
@@ -151,6 +154,11 @@ tri2_t correct_tri(tri2_t tri) {
 		CLAMP_HEIGHT
 	);
 	
+	TRI2_OP_PERFORM(
+		tri,
+		FLOOR_TRI,
+		FLOOR_TRI
+	);
 	// dealing with an edge case. warning: this is code 
 	// is vomit inducing. you have been warned.
 	int is_upside_down = 0;
@@ -173,14 +181,19 @@ tri2_t correct_tri(tri2_t tri) {
 	if(tri.b.x > tri.c.x) {
 		SWAP_TRI2(tri, b, c);
 	}
+	
+	// band-aid fix to the triangle overdrawing.
+	if(NEED_SWAP_TRI2(tri.b.y > tri.c.y)) {
+		SWAP_TRI2(tri, b, c);
+	}
 
 	return tri;
 }
 
 void pixel_set_tri(tri2_t x) {
-	pixel_set_vec2(x.a, rgb_combine(255, 0, 0));
-	pixel_set_vec2(x.b, rgb_combine(0, 255, 0));
-	pixel_set_vec2(x.c, rgb_combine(0, 0, 255));
+	pixel_set_vec2(x.a, rgb(255, 0, 0));
+	pixel_set_vec2(x.b, rgb(0, 255, 0));
+	pixel_set_vec2(x.c, rgb(0, 0, 255));
 }
 
 void line_tri(tri2_t tri, unsigned int color) {
@@ -259,13 +272,14 @@ void tri_draw(tri2_t bad_tri, unsigned int color) {
 		tri.b,
 		mid_point
 	};
-
+	
 	#ifndef COMMON_DEBUG_MODE
 		bottom_flat_tri_draw(bottom_flat, color);
 		top_flat_tri_draw(top_flat, color);
 	#else
-		line_tri(tri, color);
+		pixel_set_vec2(mid_point, ~color);
 		pixel_set_tri(tri);
+		line_tri(tri, color);
 	#endif
 }
 
