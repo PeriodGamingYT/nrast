@@ -130,6 +130,8 @@ mat_t mat_rot_z(num theta) {
 int is_tri_drawable(tri3_t tri) {
 
 	// https://replit.com/@Arabica/3DEngine?v=1#script.js <-- me lol.
+	// sometimes the code disposes perfectly fine triangles, leading to some flashing
+	// sometimes, TODO.
 	vec3_t l1 = {
 		tri.b.x - tri.a.x,
 		tri.b.y - tri.a.y,
