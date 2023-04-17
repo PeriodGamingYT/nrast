@@ -127,6 +127,43 @@ mat_t mat_rot_z(num theta) {
 	return result;
 }
 
+int is_tri_drawable(tri3_t tri) {
+
+	// https://replit.com/@Arabica/3DEngine?v=1#script.js <-- me lol.
+	vec3_t l1 = {
+		tri.b.x - tri.a.x,
+		tri.b.y - tri.a.y,
+		tri.b.z - tri.a.z
+	};
+	
+	vec3_t l2 = {
+		tri.c.x - tri.a.x,
+		tri.c.y - tri.a.y,
+		tri.c.z - tri.a.z
+	};
+	
+	vec3_t n = {
+		(l1.y * l2.z) - (l1.z * l2.y),
+		(l1.z * l2.x) - (l1.x * l2.z),
+		(l1.x * l2.y) - (l1.y * l2.x)
+	};
+	
+	num l = sqrt(
+		n.x * n.x +
+		n.y * n.y +
+		n.z * n.z
+	);
+	
+	n.x /= l;
+	n.y /= l;
+	n.z /= l;
+	return (
+		n.x * tri.a.x +
+		n.y * tri.a.y +
+		n.z * tri.a.z
+	) <= 0;
+}
+
 tri2_t tri3_proj(
 	tri3_t tri,
 	mat_t *proj

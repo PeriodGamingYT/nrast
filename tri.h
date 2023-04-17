@@ -202,7 +202,6 @@ void line_tri(tri2_t tri, unsigned int color) {
 	line(tri.c, tri.a, color);
 }
 
-// depending on your input the filled triangle will look out of whack. TODO
 void bottom_flat_tri_draw(tri2_t tri, unsigned int color) {
 	num inv_slope_1 = (tri.b.x - tri.a.x) / (tri.b.y - tri.a.y);
 	num inv_slope_2 = (tri.c.x - tri.a.x) / (tri.c.y - tri.a.y);
@@ -276,10 +275,10 @@ void tri_draw(tri2_t bad_tri, unsigned int color) {
 	#ifndef COMMON_DEBUG_MODE
 		bottom_flat_tri_draw(bottom_flat, color);
 		top_flat_tri_draw(top_flat, color);
+		line_tri(tri, color);
 	#else
 		pixel_set_vec2(mid_point, ~color);
 		pixel_set_tri(tri);
-		line_tri(tri, color);
 	#endif
 }
 
