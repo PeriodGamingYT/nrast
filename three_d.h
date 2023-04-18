@@ -50,7 +50,7 @@ vec3_t mul_mat(
 	if(w != 0.0) {
 		result.x /= w;
 		result.y /= w;
-		result.z /= w;		
+		result.z /= w;
 	}
 
 	return result;
@@ -130,8 +130,6 @@ mat_t mat_rot_z(num theta) {
 int is_tri_drawable(tri3_t tri) {
 
 	// https://replit.com/@Arabica/3DEngine?v=1#script.js <-- me lol.
-	// sometimes the code disposes perfectly fine triangles, leading to some flashing
-	// sometimes, TODO.
 	vec3_t l1 = {
 		tri.b.x - tri.a.x,
 		tri.b.y - tri.a.y,
@@ -163,7 +161,7 @@ int is_tri_drawable(tri3_t tri) {
 		n.x * tri.a.x +
 		n.y * tri.a.y +
 		n.z * tri.a.z
-	) <= 0;
+	) < 0.0;
 }
 
 tri2_t tri3_proj(

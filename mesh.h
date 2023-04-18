@@ -60,7 +60,7 @@ void mesh_draw(
 		if(!is_tri_drawable(tri)) {
 			continue;
 		}
-		
+
 		tri2_t draw_tri = tri3_proj(tri, proj);
 		tri_draw(draw_tri, color);
 	}

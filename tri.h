@@ -241,6 +241,8 @@ void top_flat_tri_draw(tri2_t tri, unsigned int color) {
 	}
 }
 
+// sometimes this doesn't render triangles depending
+// on input. why? who knows!
 void tri_draw(tri2_t bad_tri, unsigned int color) {
 	tri2_t tri = correct_tri(bad_tri);
 	if(tri.b.y == tri.c.y) {
@@ -278,10 +280,8 @@ void tri_draw(tri2_t bad_tri, unsigned int color) {
 	#ifndef COMMON_DEBUG_MODE
 		bottom_flat_tri_draw(bottom_flat, color);
 		top_flat_tri_draw(top_flat, color);
-		line_tri(tri, color);
 	#else
-		pixel_set_vec2(mid_point, ~color);
-		pixel_set_tri(tri);
+		line_tri(tri, color);
 	#endif
 }
 
