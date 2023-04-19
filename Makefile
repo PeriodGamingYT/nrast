@@ -1,4 +1,14 @@
-make: main.c
+.PHONY: run_no_clear
+run_no_clear:
+	make clean
+	make compile
+	./main
+
+run:
+	clear
+	make run_no_clear
+
+compile: main.c
 	gcc \
 	main.c \
 	-o main \
@@ -7,9 +17,3 @@ make: main.c
 
 clean:
 	rm -f main
-
-run:
-	clear
-	make clean
-	make
-	./main
