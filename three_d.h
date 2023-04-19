@@ -69,8 +69,7 @@ mat_t make_mat_proj() {
 	mat_t result;
 	clean_mat(&result);
 	
-	// https://github.com/OneLoneCoder/Javidx9/blob/master/ConsoleGameEngine/BiggerProjects/Engine3D/OneLoneCoder_olcEngine3D_Part1.cpp <-- not me lol
-	// https://replit.com/@Arabica/3DEngine?v=1#script.js <-- hey that's me!
+	// https://replit.com/@Arabica/3DEngine?v=1#script.js
 	num near = 1;
 	num far = 100.0;
 	num fov = 90.0;
@@ -129,7 +128,7 @@ mat_t mat_rot_z(num theta) {
 
 int is_tri_drawable(tri3_t tri) {
 
-	// https://replit.com/@Arabica/3DEngine?v=1#script.js <-- me lol.
+	// https://replit.com/@Arabica/3DEngine?v=1#script.js
 	vec3_t l1 = {
 		tri.b.x - tri.a.x,
 		tri.b.y - tri.a.y,

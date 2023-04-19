@@ -38,7 +38,6 @@ void horiz_line(
 		stop_x = temp;
 	}
 
-	// band-aid fix for triangle issue.
 	start_x--;
 	stop_x++;	
 	for(int i = (int) start_x; i < (int) stop_x; i++) {
@@ -120,9 +119,6 @@ typedef struct {
 	_x._y = _x._z; \
 	_x._z = temp;
 
-// probaly a better way to do this, being honest.
-// don't know what though, so it will stay like this 
-// for a little bit.
 #define NEED_SWAP_TRI2(_x) \
 	(_x) ? !is_upside_down : is_upside_down
 
@@ -162,8 +158,7 @@ tri2_t correct_tri(tri2_t tri) {
 		FLOOR_TRI,
 		FLOOR_TRI
 	);
-	// dealing with an edge case. warning: this is code 
-	// is vomit inducing. you have been warned.
+	
 	int is_upside_down = 0;
 	if(
 		(tri.c.y == tri.b.y && tri.a.y > tri.b.y) ||
@@ -185,7 +180,6 @@ tri2_t correct_tri(tri2_t tri) {
 		SWAP_TRI2(tri, b, c);
 	}
 	
-	// band-aid fix to the triangle overdrawing.
 	if(NEED_SWAP_TRI2(tri.b.y > tri.c.y)) {
 		SWAP_TRI2(tri, b, c);
 	}
@@ -241,16 +235,14 @@ void top_flat_tri_draw(tri2_t tri, unsigned int color) {
 	}
 }
 
-// sometimes this doesn't render triangles depending
-// on input. why? who knows!
 void tri_draw(tri2_t bad_tri, unsigned int color) {
 	tri2_t tri = correct_tri(bad_tri);
-	if(tri.b.y == tri.c.y) {
+	if(tri.b.y == tri.c.y && tri.a.y < tri.b.y) {
 		bottom_flat_tri_draw(tri, color);
 		return;
 	}
 
-	if(tri.a.y > tri.b.y) {
+	if(tri.b.y == tri.c.y && tri.a.y > tri.b.y) {
 		top_flat_tri_draw(tri, color);
 		return;
 	}
@@ -277,11 +269,11 @@ void tri_draw(tri2_t bad_tri, unsigned int color) {
 		mid_point
 	};
 	
-	#ifndef COMMON_DEBUG_MODE
-		bottom_flat_tri_draw(bottom_flat, color);
-		top_flat_tri_draw(top_flat, color);
-	#else
+	bottom_flat_tri_draw(bottom_flat, color);
+	top_flat_tri_draw(top_flat, color);
+	#ifdef COMMON_DEBUG_MODE
 		line_tri(tri, color);
+		pixel_set_tri(tri);
 	#endif
 }
 

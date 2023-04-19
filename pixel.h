@@ -38,7 +38,7 @@ void pixel_set(int x, int y, unsigned int color) {
 		return;
 	}
 
-	// SDL2 starts from the bottom to the top.
+	// sdl2 starts from the bottom to the top.
 	// so setting y "upside down" is needed.
 	state.data[
 		(SCREEN_HEIGHT - y - 1) * SCREEN_WIDTH + x

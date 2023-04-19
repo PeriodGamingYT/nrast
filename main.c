@@ -1,7 +1,3 @@
-// just to let you know, in some drawing calls, there will be some artifacts.
-// i have chosen not to fix these. as they help make this rasterizer stand out.
-// plus, it already has an old school feel to it. 
-// so leaving some artifacts in the rasterizer will help make it feel even more old school.
 #include "mesh.h"
 #define SDL_ASSERT(x, y) \
 	ASSERT(x, "%s: %s\n", y, SDL_GetError())
