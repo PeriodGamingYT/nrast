@@ -41,9 +41,10 @@ void render() {
 	scene_draw(&scene);
 }
 
+// TODO: Make movement and rotation consistent everywhere.
 void handle_key_down() {
 	const unsigned char *key_state = SDL_GetKeyboardState(NULL);
-	num speed = COMMON_SPEED_AMOUNT * 0.016;
+	num speed = COMMON_SPEED_AMOUNT * frame_time;
 	scene.camera_rot.x -= (
 		-key_state[SDL_SCANCODE_K] + key_state[SDL_SCANCODE_I]
 	) * speed;

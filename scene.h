@@ -30,6 +30,7 @@ void free_obj(obj_t *obj) {
 	}
 }
 
+// TODO: Make rotation consistent everywhere.
 void obj_draw(
 	obj_t *obj, 
 	mat_t *proj, 
