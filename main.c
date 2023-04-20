@@ -45,6 +45,13 @@ void render() {
 void handle_key_down() {
 	const unsigned char *key_state = SDL_GetKeyboardState(NULL);
 	num speed = COMMON_SPEED_AMOUNT * frame_time;
+	vec3_t up = { 0, 1, 0, 1 };
+	vec3_t target = { 0, 0, 1, 1 };
+	mat_t camera_rot_mat = mat_rot_y(scene.camera_rot.x);
+	vec3_t look_dir = mul_mat(target, &camera_rot_mat);
+	target = vec3_add(scene.camera_pos, look_dir);
+	mat_t camera = mat_point_at(scene.camera_pos, target, up);
+	mat_t mat_view = mat_quick_inv(camera);
 	scene.camera_rot.x -= (
 		-key_state[SDL_SCANCODE_K] + key_state[SDL_SCANCODE_I]
 	) * speed;
@@ -64,13 +71,15 @@ void handle_key_down() {
 	scene.camera_pos.y -= (
 		-key_state[SDL_SCANCODE_E] + key_state[SDL_SCANCODE_Q]
 	) * speed;
-	
-	scene.camera_pos.z -= (
-		-key_state[SDL_SCANCODE_S] + key_state[SDL_SCANCODE_W]
-	) * speed;
 
+	num forward_key = 
+		(-key_state[SDL_SCANCODE_W] + key_state[SDL_SCANCODE_S)) * speed;
+	
+	vec3_t forward_vec = { forward_key, forward_key, forward_key, 1 };
+	vec3_t forward = vec3_mul(look_dir, forward_vec);
+	scene.camera_pos = vec3_add(scene.camera_pos, forward);
 	if(key_state[SDL_SCANCODE_R]) {
-		vec3_t zero = { 0, 0, 0 };
+		vec3_t zero = { 0, 0, 0, 1 };
 		scene.camera_pos = zero;
 		scene.camera_rot = zero;
 	}

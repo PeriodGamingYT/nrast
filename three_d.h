@@ -4,11 +4,72 @@
 #include <math.h>
 
 typedef struct {
-	num x, y, z;
+	num x, y, z, w;
 } vec3_t;
 
 #define PRINT_VEC3(_x) \
 	printf("vec3_t %f %f %f\n", _x.x, _x.y, _x.z)
+
+num vec3_dot(vec3_t a, vec3_t b) {
+	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
+}
+
+num vec3_length(vec3_t a) {
+	return sqrt(vec3_dot(a, a));
+}
+
+vec3_t vec3_normalize(vec3_t a) {
+	num l = vec3_length(a);
+	vec3_t result = {
+		a.x / l,
+		a.y / l,
+		a.z / l,
+		1
+	};
+
+	return result;
+}
+
+vec3_t vec3_add(vec3_t a, vec3_t b) {
+	vec3_t result =  {
+		a.x + b.x,
+		a.y + b.y,
+		a.z + b.z,
+		1
+	};
+
+	return result;
+}
+
+vec3_t vec3_sub(vec3_t a, vec3_t b) {
+	vec3_t result =  {
+		a.x - b.x,
+		a.y - b.y,
+		a.z - b.z,
+		1
+	};
+
+	return result;
+}
+
+vec3_t vec3_mul(vec3_t a, vec3_t b) {
+	vec3_t result =  {
+		a.x * b.x,
+		a.y * b.y,
+		a.z * b.z,
+		1
+	};
+
+	return result;
+}
+
+vec3_t vec3_cross(vec3_t a, vec3_t b) {
+	vec3_t result;
+	result.x = a.y * b.z - a.z * b.y;
+	result.y = a.z * b.x - a.x * b.z;
+	result.z = a.x * a.y - a.y * b.x;
+	return result;
+}
 
 typedef struct {
 	vec3_t a, b, c;
@@ -36,23 +97,24 @@ typedef struct {
 
 #define PI 3.14159
 #define M(_x, _y, _z) \
-	i._x * mat->m[_y][_z]
+	a._x * mat->m[_y][_z]
 
-vec3_t mul_mat(
-	vec3_t i,
-	mat_t *mat
-) {
+vec3_t vec3_div_w(vec3_t a) {
+	if(a.w != 0.0) {
+		a.x /= a.w;
+		a.y /= a.w;
+		a.z /= a.w;
+	}
+
+	return a;
+}
+
+vec3_t mul_mat(vec3_t a, mat_t *mat) {
 	vec3_t result;
 	result.x = M(x, 0, 0) + M(y, 1, 0) + M(z, 2, 0) + mat->m[3][0];
 	result.y = M(x, 0, 1) + M(y, 1, 1) + M(z, 2, 1) + mat->m[3][1];
 	result.z = M(x, 0, 2) + M(y, 1, 2) + M(z, 2, 2) + mat->m[3][2];
-	num w = M(x, 0, 3) + M(y, 1, 3) + M(z, 2, 3) + mat->m[3][3];
-	if(w != 0.0) {
-		result.x /= w;
-		result.y /= w;
-		result.z /= w;
-	}
-
+	result.w = M(x, 0, 3) + M(y, 1, 3) + M(z, 2, 3) + mat->m[3][3];
 	return result;
 }
 
@@ -86,6 +148,16 @@ mat_t make_mat_proj() {
 
 num deg(num x) {
 	num result =  (x * PI) / 180.0;
+	return result;
+}
+
+mat_t mat_identity() {
+	mat_t result;
+	clean_mat(&result);
+	result.m[0][0] = 1.0;
+	result.m[1][1] = 1.0;
+	result.m[2][2] = 1.0;
+	result.m[3][3] = 1.0;
 	return result;
 }
 
@@ -126,25 +198,106 @@ mat_t mat_rot_z(num theta) {
 	return result;
 }
 
+mat_t mat_trans(vec3_t trans) {
+	mat_t result = mat_identity();
+	result.m[3][0] = trans.x;
+	result.m[3][1] = trans.y;
+	result.m[3][2] = trans.z;
+	return result;
+}
+
+#define M(_x) \
+	a.m[x][_x] * b.m[_x][y]
+
+mat_t mat_mul_mat(mat_t a, mat_t b) {
+	mat_t result;
+	clean_mat(&result);
+	for(int y = 0; y < 4; y++) {
+		for(int x = 0; x < 4; x++) {
+			result.m[y][x] = M(0) + M(1) + M(2) + M(3);
+		}
+	}
+
+	return result;
+}
+
+#undef M
+mat_t mat_point_at(vec3_t pos, vec3_t target, vec3_t up) {
+	vec3_t new_forward = vec3_sub(target, pos);
+	new_forward = vec3_normalize(new_forward);
+	num dot = vec3_dot(up, new_forward);
+	vec3_t dot_vec = { dot, dot, dot, 0 };
+	vec3_t a = vec3_mul(new_forward, dot_vec);
+	vec3_t new_up = vec3_sub(up, a);
+	new_up = vec3_normalize(new_up);
+	vec3_t new_right = vec3_cross(new_up, new_forward);
+	mat_t result;
+	result.m[0][0] = new_right.x;
+	result.m[0][1] = new_right.y;
+	result.m[0][2] = new_right.z;
+	result.m[0][3] = 0.0;
+	result.m[1][0] = new_up.x;
+	result.m[1][1] = new_up.y;
+	result.m[1][2] = new_up.z;
+	result.m[1][3] = 0.0;
+	result.m[2][0] = new_forward.x;
+	result.m[2][1] = new_forward.y;
+	result.m[2][2] = new_forward.z;
+	result.m[2][3] = 0.0;
+	result.m[3][0] = pos.x;
+	result.m[3][1] = pos.y;
+	result.m[3][2] = pos.z;
+	result.m[3][3] = 1.0;
+	return result;
+}
+
+mat_t mat_quick_inv(mat_t mat) {
+	mat_t result;
+	result.m[0][0] = mat.m[0][0];
+	result.m[0][1] = mat.m[1][0];
+	result.m[0][2] = mat.m[2][0];
+	result.m[0][3] = 0.0;
+	result.m[1][0] = mat.m[0][1];
+	result.m[1][1] = mat.m[1][1];
+	result.m[1][2] = mat.m[2][1];
+	result.m[1][3] = 0.0;
+	result.m[2][0] = mat.m[0][2];
+	result.m[2][1] = mat.m[1][2];
+	result.m[2][2] = mat.m[2][2];
+	result.m[2][3] = 0.0;
+	result.m[3][0] = mat.m[0][3];
+	result.m[3][1] = mat.m[1][3];
+	result.m[3][2] = mat.m[2][3];
+	result.m[3][3] = 1.0;
+	result.m[3][0] = -(mat.m[3][0] * result.m[0][0] + mat.m[3][1] * result.m[1][0] + mat.m[3][2] * result.m[2][0]);
+	result.m[3][1] = -(mat.m[3][0] * result.m[0][1] + mat.m[3][1] * result.m[1][1] + mat.m[3][2] * result.m[2][1]);
+	result.m[3][2] = -(mat.m[3][0] * result.m[0][2] + mat.m[3][1] * result.m[1][2] + mat.m[3][2] * result.m[2][2]);
+	result.m[3][3] = 1.0;
+	return result;
+}
+
 int is_tri_drawable(tri3_t tri) {
 
 	// https://replit.com/@Arabica/3DEngine?v=1#script.js
 	vec3_t l1 = {
 		tri.b.x - tri.a.x,
 		tri.b.y - tri.a.y,
-		tri.b.z - tri.a.z
+		tri.b.z - tri.a.z,
+		1
 	};
 	
 	vec3_t l2 = {
 		tri.c.x - tri.a.x,
 		tri.c.y - tri.a.y,
-		tri.c.z - tri.a.z
+		tri.c.z - tri.a.z,
+		1
 	};
 	
 	vec3_t n = {
 		(l1.y * l2.z) - (l1.z * l2.y),
 		(l1.z * l2.x) - (l1.x * l2.z),
-		(l1.x * l2.y) - (l1.y * l2.x)
+		(l1.x * l2.y) - (l1.y * l2.x),
+		1
 	};
 	
 	num l = sqrt(
@@ -164,25 +317,6 @@ int is_tri_drawable(tri3_t tri) {
 }
 
 // https://github.com/OneLoneCoder/Javidx9/blob/master/ConsoleGameEngine/BiggerProjects/Engine3D/OneLoneCoder_olcEngine3D_Part3.cpp
-num vec3_dot(vec3_t a, vec3_t b) {
-	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
-}
-
-num vec3_length(vec3_t a) {
-	return sqrt(vec3_dot(a, a));
-}
-
-vec3_t vec3_normalize(vec3_t a) {
-	num l = vec3_length(a);
-	vec3_t result = {
-		a.x / l,
-		a.y / l,
-		a.z / l
-	};
-
-	return result;
-}
-
 typedef struct {
 	tri3_t a;
 	tri3_t b;
@@ -214,35 +348,7 @@ num vec3_plane_dist(vec3_t p, vec3_t plane_p, vec3_t plane_n) {
 #define ARRAY_SIZE(_x) \
 	((int)(sizeof(_x) / sizeof((_x)[0])))
 
-vec3_t vec3_add(vec3_t a, vec3_t b) {
-	vec3_t result =  {
-		a.x + b.x,
-		a.y + b.y,
-		a.z + b.z
-	};
 
-	return result;
-}
-
-vec3_t vec3_sub(vec3_t a, vec3_t b) {
-	vec3_t result =  {
-		a.x - b.x,
-		a.y - b.y,
-		a.z - b.z
-	};
-
-	return result;
-}
-
-vec3_t vec3_mul(vec3_t a, vec3_t b) {
-	vec3_t result =  {
-		a.x * b.x,
-		a.y * b.y,
-		a.z * b.z
-	};
-
-	return result;
-}
 
 vec3_t vec3_intersect_plane(
 	vec3_t plane_p, 
@@ -256,7 +362,7 @@ vec3_t vec3_intersect_plane(
 	num bd = vec3_dot(end, plane_n);
 	num t = (-plane_d - ad) / (bd - ad);
 	vec3_t start_to_end = vec3_sub(end, start);
-	vec3_t t_vec = { t, t, t };
+	vec3_t t_vec = { t, t, t, 1 };
 	vec3_t intersect = vec3_mul(start_to_end, t_vec);
 	return vec3_add(start, intersect);
 }
@@ -316,11 +422,20 @@ clip_t tri3_clip(
 	return result;
 }
 
+tri3_t tri3_div_w(tri3_t tri) {
+	tri3_t result;
+	result.a = vec3_div_w(tri.a);
+	result.b = vec3_div_w(tri.b);
+	result.c = vec3_div_w(tri.c);
+	return result;	
+}
+
 tri3_t tri3_proj(tri3_t tri, mat_t *proj) {
 	tri3_t proj_tri;
 	proj_tri.a = mul_mat(tri.a, proj);
 	proj_tri.b = mul_mat(tri.b, proj);
 	proj_tri.c = mul_mat(tri.c, proj);
+	proj_tri = tri3_div_w(proj_tri);
 	proj_tri.a.x++; proj_tri.a.y++;
 	proj_tri.b.x++; proj_tri.b.y++;
 	proj_tri.c.x++; proj_tri.c.y++;

@@ -10,7 +10,7 @@ typedef struct {
 
 #define MESH_CUBE_LENGTH 12
 #define TRI3_PART(_a, _b, _c, _d, _e, _f, _g, _h, _i) \
-	{ { _a, _b, _c }, { _d, _e, _f }, { _g, _h, _i } }
+	{ { _a, _b, _c, 1.0 }, { _d, _e, _f, 1.0 }, { _g, _h, _i, 1.0 } }
 
 void mesh_clean_slate(mesh_t *mesh) {
 	for(int i = 0; i < mesh->tris_size; i++) {
@@ -56,6 +56,12 @@ mesh_t make_cube_mesh() {
 	plane_n.y = _e; \
 	plane_n.z = _f
 
+#define TRI3_MAT_MUL(_x, _y) \
+	_x.a = mul_mat(_x.a, _y); \
+	_x.b = mul_mat(_x.b, _y); \
+	_x.c = mul_mat(_x.c, _y)	
+
+
 void mesh_draw(
 	mesh_t *mesh, 
 	mat_t *proj, 
@@ -96,9 +102,9 @@ void mesh_draw(
 		}
 	}
 
-	// TODO: Sorting.
+	// TODO: depth buffer.
 	tri3_t *drawn_tris = (tri3_t *) malloc(0);
-	tri3_t no_tri = { 0 };
+	tri3_t no_tri = TRI3_PART(0, 0, 0, 0, 0, 0, 0, 0, 0);
 	int drawn_tris_size = 0;
 	for(int i = 0; i < drawable_tris_size; i++) {
 		drawn_tris_size++;
@@ -186,8 +192,9 @@ void mesh_draw(
 	VEC3_OP_PERFORM(_x.c, _y)
 
 void mesh_trans(mesh_t *mesh, vec3_t trans) {
+	mat_t trans_mat = mat_trans(trans);
 	for(int i = 0; i < mesh->tris_size; i++) {
-		TRI3_OP_PERFORM(mesh->tris[i], + trans);
+		TRI3_MAT_MUL(mesh->tris[i], &trans_mat);
 	}
 }
 
@@ -196,11 +203,6 @@ void mesh_scale(mesh_t *mesh, vec3_t scale) {
 		TRI3_OP_PERFORM(mesh->tris[i], * scale);
 	}
 }
-
-#define TRI3_MAT_MUL(_x, _y) \
-	_x.a = mul_mat(_x.a, _y); \
-	_x.b = mul_mat(_x.b, _y); \
-	_x.c = mul_mat(_x.c, _y)	
 
 void mesh_rot(mesh_t *mesh, vec3_t rot) {
 	mat_t rot_x = mat_rot_x(rot.x);
