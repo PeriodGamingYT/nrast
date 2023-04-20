@@ -5,7 +5,7 @@
 typedef struct {
 	tri3_t *orig_tris;
 	tri3_t *tris;
-	int tris_length;
+	int tris_size;
 } mesh_t;
 
 #define MESH_CUBE_LENGTH 12
@@ -14,7 +14,7 @@ typedef struct {
 	{ { _a, _b, _c }, { _d, _e, _f }, { _g, _h, _i } }
 
 void mesh_clean_slate(mesh_t *mesh) {
-	for(int i = 0; i < mesh->tris_length; i++) {
+	for(int i = 0; i < mesh->tris_size; i++) {
 		mesh->tris[i] = mesh->orig_tris[i];
 	}
 }
@@ -40,8 +40,8 @@ mesh_t make_cube_mesh() {
 
 	result.tris = (tri3_t *) malloc(sizeof(tri3_t) * MESH_CUBE_LENGTH);
 	result.orig_tris = (tri3_t *) malloc(sizeof(tri3_t) * MESH_CUBE_LENGTH);
-	result.tris_length = MESH_CUBE_LENGTH;
-	for(int i = 0; i < result.tris_length; i++) {
+	result.tris_size = MESH_CUBE_LENGTH;
+	for(int i = 0; i < result.tris_size; i++) {
 		result.orig_tris[i] = tris[i];
 	}
 
@@ -49,20 +49,112 @@ mesh_t make_cube_mesh() {
 	return result;
 }
 
+#define CLIP_PREP_ASSIGN(_a, _b, _c, _d, _e, _f) \
+	plane_p.x = _a; \
+	plane_p.y = _b; \
+	plane_p.z = _c; \
+	plane_n.x = _d; \
+	plane_n.y = _e; \
+	plane_n.z = _f
+
 void mesh_draw(
 	mesh_t *mesh, 
 	mat_t *proj, 
 	unsigned int color
 ) {
-	for(int i = 0; i < mesh->tris_length; i++) {
+	tri3_t *drawable_tris = (tri3_t *) malloc(sizeof(tri3_t));
+	int drawable_tris_size = 0;
+	for(int i = 0; i < mesh->tris_size; i++) {
 		tri3_t tri = mesh->tris[i];
 		if(!is_tri_drawable(tri)) {
 			continue;
 		}
 
-		tri2_t draw_tri = tri3_proj(tri, proj);
+		tri = tri3_proj(tri, proj);
+		drawable_tris_size++;
+		drawable_tris = (tri3_t *) realloc(
+			drawable_tris,
+			sizeof(tri3_t) * drawable_tris_size
+		);
+
+		drawable_tris[drawable_tris_size - 1] = tri;
+	}
+
+	// TODO: Sorting.
+	tri3_t *drawn_tris = (tri3_t *) malloc(0);
+	int drawn_tris_size = 0;
+	for(int i = 0; i < drawable_tris_size; i++) {
+		drawn_tris_size++;
+		drawn_tris = (tri3_t *) realloc(
+			drawn_tris,
+			sizeof(tri3_t) * drawn_tris_size
+		);
+
+		drawn_tris[drawn_tris_size - 1] = drawable_tris[i];
+		int new_tris = 1;
+		for(int p = 0; p < 4; p++) {
+			while(new_tris > 0) {
+				tri3_t test = drawn_tris[drawn_tris_size - 1];
+				drawn_tris_size--;
+				drawn_tris = (tri3_t *) realloc(
+					drawn_tris,
+					sizeof(tri3_t) * drawn_tris_size
+				);
+
+				new_tris--;
+				vec3_t plane_p;
+				vec3_t plane_n;
+				switch(p) {
+					case 0:
+						CLIP_PREP_ASSIGN(0, 0, 0, 0, 1, 0);
+						break;
+
+					case 1:
+						CLIP_PREP_ASSIGN(0, (num) SCREEN_HEIGHT - 1, 0, 0, -1, 0);
+						break;
+
+					case 2:
+						CLIP_PREP_ASSIGN(0, 0, 0, 1, 0, 0);
+						break;
+
+					case 3:
+						CLIP_PREP_ASSIGN((num) SCREEN_WIDTH - 1, 0, 0, -1, 0, 0);
+						break;
+				}
+
+				clip_t clipped = tri3_clip(plane_p, plane_n, test);
+				drawn_tris_size += clipped.tri_count;
+				drawn_tris = (tri3_t *) realloc(
+					drawn_tris,
+					sizeof(tri3_t) * drawn_tris_size
+				);
+				
+				switch(clipped.tri_count) {
+					case 0:
+						break;
+
+					case 1:
+						drawn_tris[drawn_tris_size - 1] =  clipped.a;
+						break;
+
+					case 2:
+						drawn_tris[drawn_tris_size - 2] = clipped.a;
+						drawn_tris[drawn_tris_size - 1] = clipped.b;
+						break;
+				}
+			}
+
+			new_tris = drawn_tris_size;
+		}
+	}
+	
+	free(drawable_tris);
+	for(int i = 0; i < drawn_tris_size; i++) {
+		tri2_t draw_tri = tri3_to_tri2(drawn_tris[i]);
 		tri_draw(draw_tri, color);
 	}
+
+	free(drawn_tris);
 }
 
 #define VEC3_OP_PERFORM(_x, _y) \
@@ -76,8 +168,14 @@ void mesh_draw(
 	VEC3_OP_PERFORM(_x.c, _y)
 
 void mesh_trans(mesh_t *mesh, vec3_t trans) {
-	for(int i = 0; i < mesh->tris_length; i++) {
+	for(int i = 0; i < mesh->tris_size; i++) {
 		TRI3_OP_PERFORM(mesh->tris[i], + trans);
+	}
+}
+
+void mesh_scale(mesh_t *mesh, vec3_t scale) {
+	for(int i = 0; i < mesh->tris_size; i++) {
+		TRI3_OP_PERFORM(mesh->tris[i], * scale);
 	}
 }
 
@@ -90,7 +188,7 @@ void mesh_rot(mesh_t *mesh, vec3_t rot) {
 	mat_t rot_x = mat_rot_x(rot.x);
 	mat_t rot_y = mat_rot_y(rot.y);
 	mat_t rot_z = mat_rot_z(rot.z);
-	for(int i = 0; i < mesh->tris_length; i++) {
+	for(int i = 0; i < mesh->tris_size; i++) {
 		TRI3_MAT_MUL(mesh->tris[i], &rot_z);
 		TRI3_MAT_MUL(mesh->tris[i], &rot_x);
 		TRI3_MAT_MUL(mesh->tris[i], &rot_y);

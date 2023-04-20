@@ -268,9 +268,12 @@ void tri_draw(tri2_t bad_tri, unsigned int color) {
 		tri.b,
 		mid_point
 	};
+
+	#ifdef COMMON_FILL_TRI
+		bottom_flat_tri_draw(bottom_flat, color);
+		top_flat_tri_draw(top_flat, color);
+	#endif
 	
-	bottom_flat_tri_draw(bottom_flat, color);
-	top_flat_tri_draw(top_flat, color);
 	#ifdef COMMON_DEBUG_MODE
 		line_tri(tri, color);
 		pixel_set_tri(tri);

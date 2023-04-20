@@ -15,5 +15,9 @@ compile: main.c
 	`sdl2-config --cflags --libs` \
 	-lm
 
+debug:
+	make compile
+	valgrind ./main
+
 clean:
 	rm -f main

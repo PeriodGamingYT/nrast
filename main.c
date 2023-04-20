@@ -1,4 +1,4 @@
-#include "mesh.h"
+#include "scene.h"
 #define SDL_ASSERT(x, y) \
 	ASSERT(x, "%s: %s\n", y, SDL_GetError())
 
@@ -32,34 +32,48 @@ void create_sdl() {
 	state.data = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * 4);
 }
 
-mesh_t cube;
-mat_t proj;
+scene_t scene;
 num old_time = 0;
 num new_time = 0;
 num elapsed_time = 0;
+num frame_time = 0;
 void render() {
-	new_time = SDL_GetTicks();
-	mesh_clean_slate(&cube);
-	num frame_time = (new_time - old_time);
-	elapsed_time += frame_time;
-	vec3_t trans = { 0, 0, 3 };
+	scene_draw(&scene);
+}
 
-	// dumb hack, will get rid of later when I want to move on 
-	// from this demo.
-	num slow_time = elapsed_time / 10.0;
-	if(slow_time > 1000.0) {
-		elapsed_time = 0.0;
-	}
+void handle_key_down() {
+	const unsigned char *key_state = SDL_GetKeyboardState(NULL);
+	num speed = 0.016;
+	scene.camera_rot.x -= (
+		-(!!key_state[SDL_SCANCODE_I]) + (!!key_state[SDL_SCANCODE_K])
+	) * speed;
+
+	scene.camera_rot.y -= (
+		-(!!key_state[SDL_SCANCODE_J]) + (!!key_state[SDL_SCANCODE_L])
+	) * speed;
 	
-	vec3_t rot = { deg(slow_time), deg(slow_time), deg(slow_time) };
-	mesh_rot(&cube, rot);
-	mesh_trans(&cube, trans);
-	mesh_draw(&cube, &proj, rgb(255, 255, 255));
-	old_time = new_time;
+	scene.camera_rot.z -= (
+		-(!!key_state[SDL_SCANCODE_U]) + (!!key_state[SDL_SCANCODE_O])
+	) * speed;
+
+	scene.camera_pos.x -= (
+		-(!!key_state[SDL_SCANCODE_A]) + (!!key_state[SDL_SCANCODE_D])
+	) * speed;
+
+	scene.camera_pos.y -= (
+		-(!!key_state[SDL_SCANCODE_E]) + (!!key_state[SDL_SCANCODE_Q])
+	) * speed;
+	
+	scene.camera_pos.z -= (
+		-(!!key_state[SDL_SCANCODE_S]) + (!!key_state[SDL_SCANCODE_W])
+	) * speed;
 }
 
 void step_sdl() {
+	new_time = SDL_GetTicks();
 	SDL_Event event;
+	frame_time = new_time - old_time;
+	elapsed_time += frame_time;
 	while(SDL_PollEvent(&event)) {
 		switch(event.type) {
 			case SDL_QUIT:
@@ -68,6 +82,7 @@ void step_sdl() {
 		}
 	}
 
+	handle_key_down();
 	memset(state.data, 0, SCREEN_WIDTH * SCREEN_HEIGHT * 4);
 	render();
 	SDL_UpdateTexture(
@@ -88,10 +103,11 @@ void step_sdl() {
 	);
 
 	SDL_RenderPresent(state.renderer);
+	old_time = new_time;
 }
 
 void free_sdl() {
-	free_mesh(&cube);
+	free_scene(&scene);
 	free(state.data);
 	SDL_DestroyTexture(state.texture);
 	SDL_DestroyRenderer(state.renderer);
@@ -100,8 +116,12 @@ void free_sdl() {
 
 int main() {
 	create_sdl();
-	cube = make_cube_mesh();
-	proj = make_mat_proj();
+	scene = make_scene();
+	mesh_t cube = make_cube_mesh();
+	obj_t cube_obj = make_obj(&cube);
+	vec3_t pos = { 0, 0, 3 };
+	cube_obj.pos = pos;
+	add_scene_obj(&scene, &cube_obj);
 	while(!state.quit) {
 		step_sdl();
 	}
