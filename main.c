@@ -45,7 +45,7 @@ void handle_key_down() {
 	const unsigned char *key_state = SDL_GetKeyboardState(NULL);
 	num speed = COMMON_SPEED_AMOUNT * 0.016;
 	scene.camera_rot.x -= (
-		-key_state[SDL_SCANCODE_I] + key_state[SDL_SCANCODE_K]
+		-key_state[SDL_SCANCODE_K] + key_state[SDL_SCANCODE_I]
 	) * speed;
 
 	scene.camera_rot.y -= (

@@ -69,14 +69,31 @@ void mesh_draw(
 			continue;
 		}
 
-		tri = tri3_proj(tri, proj);
-		drawable_tris_size++;
+		vec3_t plane_p;
+		vec3_t plane_n;
+		CLIP_PREP_ASSIGN(0, 0, 0.1, 0, 0, 1);
+		clip_t clipped = tri3_clip(plane_p, plane_n, tri);
+		clipped.a = tri3_proj(clipped.a, proj);
+		clipped.b = tri3_proj(clipped.b, proj);
+		drawable_tris_size += clipped.tri_count;
 		drawable_tris = (tri3_t *) realloc(
 			drawable_tris,
 			sizeof(tri3_t) * drawable_tris_size
 		);
+		
+		switch(clipped.tri_count) {
+			case 0:
+				break;
 
-		drawable_tris[drawable_tris_size - 1] = tri;
+			case 1:
+				drawable_tris[drawable_tris_size - 1] = clipped.a;
+				break;
+
+			case 2:
+				drawable_tris[drawable_tris_size - 2] = clipped.a;
+				drawable_tris[drawable_tris_size - 1] = clipped.b;
+				break;
+		}
 	}
 
 	// TODO: Sorting.
