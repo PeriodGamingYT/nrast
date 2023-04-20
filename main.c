@@ -85,6 +85,7 @@ void step_sdl() {
 	}
 
 	handle_key_down();
+	memset(depth_buffer, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(num));
 	memset(state.data, 0, SCREEN_WIDTH * SCREEN_HEIGHT * 4);
 	render();
 	SDL_UpdateTexture(

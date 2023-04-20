@@ -62,6 +62,7 @@ mesh_t make_cube_mesh() {
 	_x.c = mul_mat(_x.c, _y)	
 
 
+num depth_buffer[SCREEN_WIDTH * SCREEN_HEIGHT] = { 0 };
 void mesh_draw(
 	mesh_t *mesh, 
 	mat_t *proj, 
@@ -102,7 +103,6 @@ void mesh_draw(
 		}
 	}
 
-	// TODO: depth buffer.
 	tri3_t *drawn_tris = (tri3_t *) malloc(0);
 	tri3_t no_tri = TRI3_PART(0, 0, 0, 0, 0, 0, 0, 0, 0);
 	int drawn_tris_size = 0;
@@ -175,7 +175,7 @@ void mesh_draw(
 	free(drawable_tris);
 	for(int i = 0; i < drawn_tris_size; i++) {
 		tri2_t draw_tri = tri3_to_tri2(drawn_tris[i]);
-		tri_draw(draw_tri, color);
+		tri_draw(draw_tri, depth_buffer, drawn_tris[i].a.w, color);
 	}
 
 	free(drawn_tris);
