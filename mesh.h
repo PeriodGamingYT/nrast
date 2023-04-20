@@ -9,7 +9,6 @@ typedef struct {
 } mesh_t;
 
 #define MESH_CUBE_LENGTH 12
-
 #define TRI3_PART(_a, _b, _c, _d, _e, _f, _g, _h, _i) \
 	{ { _a, _b, _c }, { _d, _e, _f }, { _g, _h, _i } }
 
