@@ -455,4 +455,15 @@ tri2_t tri3_to_tri2(tri3_t tri) {
 	return result;
 }
 
+vec3_t vec3_rot(vec3_t a, vec3_t rot) {
+	mat_t rot_x = mat_rot_x(rot.x);
+	mat_t rot_y = mat_rot_y(rot.y);
+	mat_t rot_z = mat_rot_z(rot.z);
+	vec3_t result = a;
+	result = mul_mat(a, &rot_x);
+	result = mul_mat(result, &rot_y);
+	result = mul_mat(result, &rot_z);
+	return result;	
+}
+
 #endif

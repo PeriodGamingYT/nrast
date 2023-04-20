@@ -41,43 +41,29 @@ void render() {
 	scene_draw(&scene);
 }
 
-// TODO: Make movement and rotation consistent everywhere.
 void handle_key_down() {
 	const unsigned char *key_state = SDL_GetKeyboardState(NULL);
 	num speed = COMMON_SPEED_AMOUNT * frame_time;
-	vec3_t up = { 0, 1, 0, 1 };
-	vec3_t target = { 0, 0, 1, 1 };
-	mat_t camera_rot_mat = mat_rot_y(scene.camera_rot.x);
-	vec3_t look_dir = mul_mat(target, &camera_rot_mat);
-	target = vec3_add(scene.camera_pos, look_dir);
-	mat_t camera = mat_point_at(scene.camera_pos, target, up);
-	mat_t mat_view = mat_quick_inv(camera);
-	scene.camera_rot.x -= (
-		-key_state[SDL_SCANCODE_K] + key_state[SDL_SCANCODE_I]
-	) * speed;
-
-	scene.camera_rot.y -= (
-		-key_state[SDL_SCANCODE_L] + key_state[SDL_SCANCODE_J]
-	) * speed;
-	
-	scene.camera_rot.z -= (
-		-key_state[SDL_SCANCODE_U] + key_state[SDL_SCANCODE_O]
-	) * speed;
-
-	scene.camera_pos.x -= (
-		-key_state[SDL_SCANCODE_A] + key_state[SDL_SCANCODE_D]
-	) * speed;
-
-	scene.camera_pos.y -= (
-		-key_state[SDL_SCANCODE_E] + key_state[SDL_SCANCODE_Q]
-	) * speed;
-
-	num forward_key = 
-		(-key_state[SDL_SCANCODE_W] + key_state[SDL_SCANCODE_S)) * speed;
-	
-	vec3_t forward_vec = { forward_key, forward_key, forward_key, 1 };
-	vec3_t forward = vec3_mul(look_dir, forward_vec);
-	scene.camera_pos = vec3_add(scene.camera_pos, forward);
+	vec3_t rot_inc_z = { 0, 0, -PI, 1  };
+	vec3_t temp_rot =  vec3_add(scene.camera_rot, rot_inc_z);
+	num rot_x_key = (-key_state[SDL_SCANCODE_K] + key_state[SDL_SCANCODE_I]) * speed;
+	vec3_t rot_x = { rot_x_key, 0, 0, 1 };
+	scene.camera_rot = vec3_add(scene.camera_rot, vec3_rot(rot_x, temp_rot));
+	num rot_y_key = (-key_state[SDL_SCANCODE_L] + key_state[SDL_SCANCODE_J]) * speed;
+	vec3_t rot_y = { 0, rot_y_key, 0, 1 };
+	scene.camera_rot = vec3_add(scene.camera_rot, vec3_rot(rot_y, temp_rot));
+	num rot_z_key = (-key_state[SDL_SCANCODE_O] + key_state[SDL_SCANCODE_U]) * speed;
+	vec3_t rot_z = { 0, 0, rot_z_key, 1 };
+	scene.camera_rot = vec3_add(scene.camera_rot, vec3_rot(rot_z, temp_rot));
+	num horiz_key = (-key_state[SDL_SCANCODE_A] + key_state[SDL_SCANCODE_D]) * speed;
+	vec3_t pos_x = { horiz_key, 0, 0, 1 };
+	scene.camera_pos = vec3_add(scene.camera_pos, vec3_rot(pos_x, temp_rot));
+	num vertical_key = (-key_state[SDL_SCANCODE_E] + key_state[SDL_SCANCODE_Q]) * speed;
+	vec3_t pos_y = { 0, vertical_key, 0, 1  };
+	scene.camera_pos = vec3_add(scene.camera_pos, vec3_rot(pos_y, temp_rot));
+	num forward_key = (-key_state[SDL_SCANCODE_W] + key_state[SDL_SCANCODE_S]) * speed;
+	vec3_t pos_z = { 0, 0, forward_key, 1 };
+	scene.camera_pos = vec3_add(scene.camera_pos, vec3_rot(pos_z, temp_rot));
 	if(key_state[SDL_SCANCODE_R]) {
 		vec3_t zero = { 0, 0, 0, 1 };
 		scene.camera_pos = zero;
@@ -135,7 +121,7 @@ int main() {
 	scene = make_scene();
 	mesh_t cube = make_cube_mesh();
 	obj_t cube_obj = make_obj(&cube);
-	vec3_t pos = { 0, 0, 3 };
+	vec3_t pos = { 0, 0, 3, 1 };
 	cube_obj.pos = pos;
 	add_scene_obj(&scene, &cube_obj);
 	while(!state.quit) {

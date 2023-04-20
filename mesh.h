@@ -209,9 +209,9 @@ void mesh_rot(mesh_t *mesh, vec3_t rot) {
 	mat_t rot_y = mat_rot_y(rot.y);
 	mat_t rot_z = mat_rot_z(rot.z);
 	for(int i = 0; i < mesh->tris_size; i++) {
-		TRI3_MAT_MUL(mesh->tris[i], &rot_z);
 		TRI3_MAT_MUL(mesh->tris[i], &rot_x);
 		TRI3_MAT_MUL(mesh->tris[i], &rot_y);
+		TRI3_MAT_MUL(mesh->tris[i], &rot_z);
 	}
 }
 

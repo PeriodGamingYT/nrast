@@ -1,6 +1,7 @@
 nrast -> Nathans RASTerizer
 Very small software 3d renderer programmed in C.
-You will need SDL2, though, but that's about it (standard c library is need, of course).
+You will need SDL2, though, but that's about it (standard c library is needed, of course).
+Chaning Z and Y rotations can make movement and rotation kind of weird.
 Controls
 	W - Move forward
 	A - Move left
