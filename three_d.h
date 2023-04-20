@@ -127,6 +127,13 @@ mat_t mat_rot_z(num theta) {
 }
 
 int is_tri_drawable(tri3_t tri) {
+	if(
+		tri.a.z <= 0 ||
+		tri.b.z <= 0 ||
+		tri.c.z <= 0		
+	) {
+		return 0;
+	}
 
 	// https://replit.com/@Arabica/3DEngine?v=1#script.js
 	vec3_t l1 = {

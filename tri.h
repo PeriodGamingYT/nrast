@@ -129,10 +129,10 @@ typedef struct {
 	((_x) > (_y) ? (_x) : (_y))
 
 #define CLAMP_WIDTH(_x) \
-	MAX(0, MIN(_x, SCREEN_WIDTH))
+	MAX(0, MIN(_x, SCREEN_WIDTH + 1))
 
 #define CLAMP_HEIGHT(_x) \
-	MAX(0, MIN(_x, SCREEN_HEIGHT))
+	MAX(0, MIN(_x, SCREEN_HEIGHT + 1))
 
 #define VEC2_OP_PERFORM(_x, _y, _z) \
 	_x.x = _y(_x.x); \

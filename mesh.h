@@ -81,6 +81,7 @@ void mesh_draw(
 
 	// TODO: Sorting.
 	tri3_t *drawn_tris = (tri3_t *) malloc(0);
+	tri3_t no_tri = { 0 };
 	int drawn_tris_size = 0;
 	for(int i = 0; i < drawable_tris_size; i++) {
 		drawn_tris_size++;
@@ -94,6 +95,7 @@ void mesh_draw(
 		for(int p = 0; p < 4; p++) {
 			while(new_tris > 0) {
 				tri3_t test = drawn_tris[drawn_tris_size - 1];
+				drawn_tris[drawn_tris_size - 1] = no_tri;
 				drawn_tris_size--;
 				drawn_tris = (tri3_t *) realloc(
 					drawn_tris,

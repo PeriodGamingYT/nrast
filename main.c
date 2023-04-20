@@ -43,29 +43,29 @@ void render() {
 
 void handle_key_down() {
 	const unsigned char *key_state = SDL_GetKeyboardState(NULL);
-	num speed = 0.016;
+	num speed = 2.0 * 0.016;
 	scene.camera_rot.x -= (
-		-(!!key_state[SDL_SCANCODE_I]) + (!!key_state[SDL_SCANCODE_K])
+		-key_state[SDL_SCANCODE_I] + key_state[SDL_SCANCODE_K]
 	) * speed;
 
 	scene.camera_rot.y -= (
-		-(!!key_state[SDL_SCANCODE_J]) + (!!key_state[SDL_SCANCODE_L])
+		-key_state[SDL_SCANCODE_L] + key_state[SDL_SCANCODE_J]
 	) * speed;
 	
 	scene.camera_rot.z -= (
-		-(!!key_state[SDL_SCANCODE_U]) + (!!key_state[SDL_SCANCODE_O])
+		-key_state[SDL_SCANCODE_U] + key_state[SDL_SCANCODE_O]
 	) * speed;
 
 	scene.camera_pos.x -= (
-		-(!!key_state[SDL_SCANCODE_A]) + (!!key_state[SDL_SCANCODE_D])
+		-key_state[SDL_SCANCODE_A] + key_state[SDL_SCANCODE_D]
 	) * speed;
 
 	scene.camera_pos.y -= (
-		-(!!key_state[SDL_SCANCODE_E]) + (!!key_state[SDL_SCANCODE_Q])
+		-key_state[SDL_SCANCODE_E] + key_state[SDL_SCANCODE_Q]
 	) * speed;
 	
 	scene.camera_pos.z -= (
-		-(!!key_state[SDL_SCANCODE_S]) + (!!key_state[SDL_SCANCODE_W])
+		-key_state[SDL_SCANCODE_S] + key_state[SDL_SCANCODE_W]
 	) * speed;
 }
 
