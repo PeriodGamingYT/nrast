@@ -43,7 +43,7 @@ void render() {
 
 void handle_key_down() {
 	const unsigned char *key_state = SDL_GetKeyboardState(NULL);
-	num speed = 2.0 * 0.016;
+	num speed = COMMON_SPEED_AMOUNT * 0.016;
 	scene.camera_rot.x -= (
 		-key_state[SDL_SCANCODE_I] + key_state[SDL_SCANCODE_K]
 	) * speed;
@@ -67,6 +67,12 @@ void handle_key_down() {
 	scene.camera_pos.z -= (
 		-key_state[SDL_SCANCODE_S] + key_state[SDL_SCANCODE_W]
 	) * speed;
+
+	if(key_state[SDL_SCANCODE_R]) {
+		vec3_t zero = { 0, 0, 0 };
+		scene.camera_pos = zero;
+		scene.camera_rot = zero;
+	}
 }
 
 void step_sdl() {
