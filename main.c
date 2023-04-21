@@ -133,22 +133,30 @@ int main() {
 	};
 
 	add_scene_light(&scene, &ambient);
-	vec3_t directional_pos_0 = { -1, 0, 0, 1 };
-	light_t directional_0 = {
+	vec3_t dir_top = { 0, -1, 0, 1 };
+	vec3_t dir_left = { -1, 0, 0, 1 };
+	vec3_t dir_forward = { 0, 0, -1, 1 };
+	light_t dir_light_top = {
 		DIRECTIONAL,
-		directional_pos_0,
-		1
+		dir_top,
+		0.3
 	};
 
-	add_scene_light(&scene, &directional_0);
-	vec3_t directional_pos_1 = { 1, 0, 0, 1 };
-	light_t directional_1 = {
+	light_t dir_light_left = {
 		DIRECTIONAL,
-		directional_pos_1,
-		1
+		dir_left,
+		0.4
 	};
 
-	add_scene_light(&scene, &directional_1);
+	light_t dir_light_forward = {
+		DIRECTIONAL,
+		dir_forward,
+		0.5
+	};
+
+	add_scene_light(&scene, &dir_light_top);
+	add_scene_light(&scene, &dir_light_left);
+	add_scene_light(&scene, &dir_light_forward);
 	while(!state.quit) {
 		step_sdl();
 	}
