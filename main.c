@@ -122,9 +122,33 @@ int main() {
 	scene = make_scene();
 	mesh_t cube = make_cube_mesh();
 	obj_t cube_obj = make_obj(&cube);
-	vec3_t pos = { 0, 0, 3, 1 };
-	cube_obj.pos = pos;
+	vec3_t cube_pos = { 0, 0, 3, 1 };
+	cube_obj.pos = cube_pos;
 	add_scene_obj(&scene, &cube_obj);
+	vec3_t ambient_pos = { -1, 0, 3, 1 };
+	light_t ambient = {
+		AMBIENT,
+		ambient_pos,
+		0.2
+	};
+
+	add_scene_light(&scene, &ambient);
+	vec3_t directional_pos_0 = { -1, 0, 0, 1 };
+	light_t directional_0 = {
+		DIRECTIONAL,
+		directional_pos_0,
+		1
+	};
+
+	add_scene_light(&scene, &directional_0);
+	vec3_t directional_pos_1 = { 1, 0, 0, 1 };
+	light_t directional_1 = {
+		DIRECTIONAL,
+		directional_pos_1,
+		1
+	};
+
+	add_scene_light(&scene, &directional_1);
 	while(!state.quit) {
 		step_sdl();
 	}

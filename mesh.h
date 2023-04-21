@@ -1,6 +1,6 @@
 #ifndef __MESH_H
 #define __MESH_H
-#include "three_d.h"
+#include "light.h"
 
 typedef struct {
 	tri3_t *orig_tris;
@@ -10,7 +10,7 @@ typedef struct {
 
 #define MESH_CUBE_LENGTH 12
 #define TRI3_PART(_a, _b, _c, _d, _e, _f, _g, _h, _i) \
-	{ { _a, _b, _c, 1.0 }, { _d, _e, _f, 1.0 }, { _g, _h, _i, 1.0 } }
+	{ { _a, _b, _c, 1.0 }, { _d, _e, _f, 1.0 }, { _g, _h, _i, 1.0 }, 1.0 }
 
 void mesh_clean_slate(mesh_t *mesh) {
 	for(int i = 0; i < mesh->tris_size; i++) {
@@ -63,6 +63,21 @@ mesh_t make_cube_mesh() {
 
 
 num depth_buffer[SCREEN_WIDTH * SCREEN_HEIGHT] = { 0 };
+void mesh_bake(
+	mesh_t *mesh,
+	light_t **lights,
+	int lights_size
+) {
+	for(int i = 0; i < mesh->tris_size; i++) {
+		vec3_t normal = tri3_normal(mesh->tris[i]);
+		mesh->tris[i].intensity = compute_lighting(
+			normal,
+			lights,
+			lights_size
+		);
+	}
+}
+
 void mesh_draw(
 	mesh_t *mesh, 
 	mat_t *proj, 
@@ -172,12 +187,30 @@ void mesh_draw(
 		}
 	}
 	
-	free(drawable_tris);
 	for(int i = 0; i < drawn_tris_size; i++) {
+
+		// Short for Light Intensity. Named this to make intensity_vec short.
+		num li = drawn_tris[i].intensity;
+		vec3_t intensity_vec = { li, li, li, 1 };
 		tri2_t draw_tri = tri3_to_tri2(drawn_tris[i]);
-		tri_draw(draw_tri, depth_buffer, drawn_tris[i].a.w, color);
+		vec3_t color_vec = vec3_mul(
+			intensity_vec, 
+			int_to_vec3(color)
+		);
+		
+		tri_draw(
+			draw_tri, 
+			depth_buffer, 
+			drawn_tris[i].a.w, 
+			rgb(
+				(unsigned char) color_vec.x,
+				(unsigned char) color_vec.y,
+				(unsigned char) color_vec.z
+			)
+		);
 	}
 
+	free(drawable_tris);
 	free(drawn_tris);
 }
 

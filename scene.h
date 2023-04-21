@@ -1,6 +1,6 @@
 #ifndef __SCENE_H
 #define __SCENE_H
-#include "light.h"
+#include "mesh.h"
 typedef struct {
 	mesh_t *mesh;
 	vec3_t pos;
@@ -35,15 +35,27 @@ void obj_draw(
 	obj_t *obj, 
 	mat_t *proj, 
 	vec3_t camera_pos,
-	vec3_t camera_rot
+	vec3_t camera_rot,
+	light_t **lights,
+	int lights_size
 ) {
 	mesh_clean_slate(obj->mesh);
 	mesh_rot(obj->mesh, obj->rot);
 	mesh_scale(obj->mesh, obj->scale);
 	mesh_trans(obj->mesh, obj->pos);
+	mesh_bake(
+		obj->mesh,
+		lights,
+		lights_size
+	);
+	
 	mesh_trans(obj->mesh, camera_pos);
 	mesh_rot(obj->mesh, camera_rot);
-	mesh_draw(obj->mesh, proj, obj->color);
+	mesh_draw(
+		obj->mesh, 
+		proj,
+		obj->color
+	);
 }
 
 typedef struct {
@@ -52,8 +64,8 @@ typedef struct {
 	vec3_t camera_pos;
 	vec3_t camera_rot;
 	mat_t proj;
-
-	// TODO: Lighting data in scene.
+	light_t **lights;
+	int lights_size;
 } scene_t;
 
 scene_t make_scene() {
@@ -63,7 +75,9 @@ scene_t make_scene() {
 		0,
 		zero,
 		zero,
-		make_mat_proj()
+		make_mat_proj(),
+		NULL,
+		0
 	};
 
 	return result;
@@ -79,20 +93,23 @@ void add_scene_obj(scene_t *scene, obj_t *obj) {
 	scene->objs[scene->objs_size - 1] = obj;
 }
 
-void free_scene(scene_t *scene) {
-	if(scene->objs != NULL) {
-		for(int i = 0; i < scene->objs_size; i++) {
-			if(scene->objs[i] == NULL) {
-				continue;
-			}
-			
-			free_obj(scene->objs[i]);
-			scene->objs[i] = NULL;
-		}
+void add_scene_light(scene_t *scene, light_t *light) {
+	scene->lights_size++;
+	scene->lights = (light_t **) realloc(
+		scene->lights,
+		scene->lights_size * sizeof(light_t *)
+	);
 
-		free(scene->objs);
-		scene->objs = NULL;
+	scene->lights[scene->lights_size - 1] = light;
+}
+
+void free_scene(scene_t *scene) {
+	for(int i = 0; i < scene->objs_size; i++) {
+		free_obj(scene->objs[i]);
 	}
+
+	free(scene->objs);
+	free(scene->lights);
 }
 
 void scene_draw(scene_t *scene) {
@@ -101,7 +118,9 @@ void scene_draw(scene_t *scene) {
 			scene->objs[i], 
 			&scene->proj, 
 			scene->camera_pos,
-			scene->camera_rot
+			scene->camera_rot,
+			scene->lights,
+			scene->lights_size
 		);
 	}
 }

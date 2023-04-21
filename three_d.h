@@ -63,6 +63,17 @@ vec3_t vec3_mul(vec3_t a, vec3_t b) {
 	return result;
 }
 
+vec3_t vec3_div(vec3_t a, vec3_t b) {
+	vec3_t result =  {
+		a.x / b.x,
+		a.y / b.y,
+		a.z / b.z,
+		1
+	};
+
+	return result;
+}
+
 vec3_t vec3_cross(vec3_t a, vec3_t b) {
 	vec3_t result;
 	result.x = a.y * b.z - a.z * b.y;
@@ -73,6 +84,7 @@ vec3_t vec3_cross(vec3_t a, vec3_t b) {
 
 typedef struct {
 	vec3_t a, b, c;
+	num intensity;
 } tri3_t;
 
 #define PRINT_TRI3(_x) \
@@ -276,7 +288,7 @@ mat_t mat_quick_inv(mat_t mat) {
 	return result;
 }
 
-int is_tri_drawable(tri3_t tri) {
+vec3_t tri3_normal(tri3_t tri) {
 
 	// https://replit.com/@Arabica/3DEngine?v=1#script.js
 	vec3_t l1 = {
@@ -309,6 +321,13 @@ int is_tri_drawable(tri3_t tri) {
 	n.x /= l;
 	n.y /= l;
 	n.z /= l;
+	return n;
+}
+
+int is_tri_drawable(tri3_t tri) {
+	vec3_t n = tri3_normal(tri);
+
+	// https://replit.com/@Arabica/3DEngine?v=1#script.js
 	return (
 		n.x * tri.a.x +
 		n.y * tri.a.y +
@@ -464,6 +483,28 @@ vec3_t vec3_rot(vec3_t a, vec3_t rot) {
 	result = mul_mat(result, &rot_y);
 	result = mul_mat(result, &rot_z);
 	return result;	
+}
+
+vec3_t center_tri(tri3_t tri) {
+	vec3_t result = {
+		3 / (tri.a.x + tri.b.x + tri.c.x),
+		3 / (tri.a.y + tri.b.y + tri.c.y),
+		3 / (tri.a.z + tri.b.z + tri.c.z),
+		1
+	};
+
+	return result;
+}
+
+vec3_t int_to_vec3(unsigned int a) {
+	vec3_t result = {
+		(num)((unsigned char)(a)),
+		(num)((unsigned char)(a >> 8)),
+		(num)((unsigned char)(a >> 16)),
+		1
+	};
+
+	return result;
 }
 
 #endif
