@@ -1,3 +1,4 @@
+
 #ifndef __MESH_H
 #define __MESH_H
 #include "light.h"
@@ -97,6 +98,8 @@ void mesh_draw(
 		clip_t clipped = tri3_clip(plane_p, plane_n, tri);
 		clipped.a = tri3_proj(clipped.a, proj);
 		clipped.b = tri3_proj(clipped.b, proj);
+		clipped.a.intensity = tri.intensity;
+		clipped.b.intensity = tri.intensity;
 		drawable_tris_size += clipped.tri_count;
 		drawable_tris = (tri3_t *) realloc(
 			drawable_tris,

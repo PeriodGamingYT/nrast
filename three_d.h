@@ -412,6 +412,8 @@ clip_t tri3_clip(
 	}
 
 	clip_t result;
+	result.a.intensity = tri.intensity;
+	result.b.intensity = tri.intensity;
 	if(inside_size == 0) {
 		result.tri_count = 0;
 		return result;

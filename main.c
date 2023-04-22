@@ -132,7 +132,6 @@ int main() {
 		0.2
 	};
 
-	add_scene_light(&scene, &ambient);
 	vec3_t dir_top = { 0, -1, 0, 1 };
 	vec3_t dir_left = { -1, 0, 0, 1 };
 	vec3_t dir_forward = { 0, 0, -1, 1 };
@@ -154,6 +153,7 @@ int main() {
 		0.5
 	};
 
+	add_scene_light(&scene, &ambient);
 	add_scene_light(&scene, &dir_light_top);
 	add_scene_light(&scene, &dir_light_left);
 	add_scene_light(&scene, &dir_light_forward);

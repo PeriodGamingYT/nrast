@@ -37,7 +37,7 @@ num compute_lighting(
 		}
 	}
 
-	intensity = CLAMP(0, 1, intensity);
+	//intensity = CLAMP(0, 1, intensity);
 	return intensity;
 }
 
