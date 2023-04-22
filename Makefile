@@ -1,5 +1,8 @@
 .PHONY: run_no_clear
-CC = gcc-12
+ifndef $(CC)
+	CC = gcc
+endif
+
 run_no_clear:
 	make clean
 	make compile
