@@ -1,4 +1,8 @@
 .PHONY: run_no_clear
+ifndef $(CC)
+	CC = gcc
+endif
+
 run_no_clear:
 	make clean
 	make compile
@@ -9,10 +13,11 @@ run:
 	make run_no_clear
 
 compile: main.c
-	gcc \
+	$(CC) \
 	main.c \
 	-o main \
 	`sdl2-config --cflags --libs` \
+	-I/opt/local/include/ \
 	-lm
 
 debug:
