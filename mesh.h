@@ -86,11 +86,11 @@ void mesh_draw(
 	tri3_t *drawable_tris = (tri3_t *) malloc(sizeof(tri3_t));
 	int drawable_tris_size = 0;
 	for(int i = 0; i < mesh->tris_size; i++) {
-		tri3_t tri = mesh->tris[i];
-		if(!is_tri_drawable(tri)) {
+		if(!is_tri_drawable(mesh->tris[i])) {
 			continue;
 		}
-
+		
+		tri3_t tri = mesh->tris[i];
 		vec3_t plane_p;
 		vec3_t plane_n;
 		CLIP_PREP_ASSIGN(0, 0, 0.1, 0, 0, 1);
@@ -245,6 +245,12 @@ void mesh_rot(mesh_t *mesh, vec3_t rot) {
 		TRI3_MAT_MUL(mesh->tris[i], &rot_x);
 		TRI3_MAT_MUL(mesh->tris[i], &rot_y);
 		TRI3_MAT_MUL(mesh->tris[i], &rot_z);
+	}
+}
+
+void mesh_mat_mul(mesh_t *mesh, mat_t *mat) {
+	for(int i= 0; i < mesh->tris_size; i++) {
+		TRI3_MAT_MUL(mesh->tris[i], mat);
 	}
 }
 

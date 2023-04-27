@@ -118,49 +118,56 @@ void free_sdl() {
 }
 
 int main() {
-	create_sdl();
-	scene = make_scene();
-	mesh_t cube = make_cube_mesh();
-	obj_t cube_obj = make_obj(&cube);
-	vec3_t cube_pos = { 0, 0, 3, 1 };
-	cube_obj.pos = cube_pos;
-	add_scene_obj(&scene, &cube_obj);
-	vec3_t ambient_pos = { -1, 0, 3, 1 };
-	light_t ambient = {
-		AMBIENT,
-		ambient_pos,
-		0.2
-	};
 
-	add_scene_light(&scene, &ambient);
-	vec3_t dir_top = { 0, -1, 0, 1 };
-	vec3_t dir_left = { -1, 0, 0, 1 };
-	vec3_t dir_forward = { 0, 0, -1, 1 };
-	light_t dir_light_top = {
-		DIRECTIONAL,
-		dir_top,
-		0.3
-	};
+	// whenever something goes wrong, i test each part of the buggy code
+	// one by one, COMMON_DEBUG_ALONE helps me do that. 
+	#ifdef COMMON_DEBUG_ALONE
+		return 0;
+	#else
+		create_sdl();
+		scene = make_scene();
+		mesh_t obj_mesh = make_cube_mesh();
+		obj_t obj = make_obj(&obj_mesh);
+		vec3_t obj_pos = { 0, 0, 3, 1 };
+		obj.pos = obj_pos;
+		add_scene_obj(&scene, &obj);
+		vec3_t ambient_pos = { -1, 0, 3, 1 };
+		light_t ambient = {
+			AMBIENT,
+			ambient_pos,
+			0.2
+		};
 
-	light_t dir_light_left = {
-		DIRECTIONAL,
-		dir_left,
-		0.4
-	};
+		add_scene_light(&scene, &ambient);
+		vec3_t dir_top = { 0, -1, 0, 1 };
+		vec3_t dir_left = { -1, 0, 0, 1 };
+		vec3_t dir_forward = { 0, 0, -1, 1 };
+		light_t dir_light_top = {
+			DIRECTIONAL,
+			dir_top,
+			0.3
+		};
 
-	light_t dir_light_forward = {
-		DIRECTIONAL,
-		dir_forward,
-		0.5
-	};
+		light_t dir_light_left = {
+			DIRECTIONAL,
+			dir_left,
+			0.4
+		};
 
-	add_scene_light(&scene, &dir_light_top);
-	add_scene_light(&scene, &dir_light_left);
-	add_scene_light(&scene, &dir_light_forward);
-	while(!state.quit) {
-		step_sdl();
-	}
+		light_t dir_light_forward = {
+			DIRECTIONAL,
+			dir_forward,
+			0.5
+		};
 
-	free_sdl();
-	return 0;
+		add_scene_light(&scene, &dir_light_top);
+		add_scene_light(&scene, &dir_light_left);
+		add_scene_light(&scene, &dir_light_forward);
+		while(!state.quit) {
+			step_sdl();
+		}
+
+		free_sdl();
+		return 0;
+	#endif
 }

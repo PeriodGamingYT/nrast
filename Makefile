@@ -16,8 +16,11 @@ compile: main.c
 	-lm
 
 debug:
+	clear
 	make compile
-	valgrind ./main
+	valgrind \
+		--main-stacksize=99999999 \
+		./main
 
 clean:
 	rm -f main

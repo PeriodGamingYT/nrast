@@ -30,10 +30,10 @@ unsigned int rgb(
 
 void pixel_set(int x, int y, unsigned int color) {
 	if(
-		!(x >= 0 &&
-		y >= 0 &&
-		x < SCREEN_WIDTH &&
-		y < SCREEN_HEIGHT)
+		x < 0 ||
+		y < 0 ||
+		x >= SCREEN_WIDTH ||
+		y >= SCREEN_HEIGHT
 	) {
 		return;
 	}

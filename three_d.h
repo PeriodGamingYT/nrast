@@ -324,10 +324,9 @@ vec3_t tri3_normal(tri3_t tri) {
 	return n;
 }
 
+// https://replit.com/@Arabica/3DEngine?v=1#script.js
 int is_tri_drawable(tri3_t tri) {
 	vec3_t n = tri3_normal(tri);
-
-	// https://replit.com/@Arabica/3DEngine?v=1#script.js
 	return (
 		n.x * tri.a.x +
 		n.y * tri.a.y +
