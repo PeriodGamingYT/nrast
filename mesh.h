@@ -200,11 +200,17 @@ void mesh_draw(
 			intensity_vec, 
 			int_to_vec3(color)
 		);
+
+		z_t z = {
+			drawn_tris[i].a.z,
+			drawn_tris[i].b.z,
+			drawn_tris[i].c.z
+		};
 		
 		tri_draw(
 			draw_tri, 
-			depth_buffer, 
-			drawn_tris[i].a.w, 
+			depth_buffer,
+			z, 
 			rgb(
 				(unsigned char) color_vec.x,
 				(unsigned char) color_vec.y,

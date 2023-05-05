@@ -3,10 +3,6 @@
 #include "tri.h"
 #include <math.h>
 
-typedef struct {
-	num x, y, z, w;
-} vec3_t;
-
 #define PRINT_VEC3(_x) \
 	printf("vec3_t %f %f %f\n", _x.x, _x.y, _x.z)
 
@@ -83,19 +79,14 @@ vec3_t vec3_cross(vec3_t a, vec3_t b) {
 }
 
 typedef struct {
-	vec3_t a, b, c;
-	num intensity;
-} tri3_t;
+	num m[4][4];
+} mat_t;
 
 #define PRINT_TRI3(_x) \
 	printf("tri3_t\n"); \
 	PRINT_VEC3(_x.a); \
 	PRINT_VEC3(_x.b); \
 	PRINT_VEC3(_x.c)
-
-typedef struct {
-	num m[4][4];
-} mat_t;
 
 #define PRINT_MAT(_x) \
 	printf("mat_t\n"); \
@@ -144,8 +135,8 @@ mat_t make_mat_proj() {
 	clean_mat(&result);
 	
 	// https://replit.com/@Arabica/3DEngine?v=1#script.js
-	num near = 1;
-	num far = 100.0;
+	num near = COMMON_Z_NEAR;
+	num far = COMMON_Z_FAR;
 	num fov = 90.0;
 	num fov_rad = 1.0 / tanf(fov * 0.5 / 180.0 * PI);
 	num aspect_ratio = ((num)(SCREEN_HEIGHT) / (num)(SCREEN_WIDTH)) * fov_rad;
@@ -491,17 +482,6 @@ vec3_t center_tri(tri3_t tri) {
 		3 / (tri.a.x + tri.b.x + tri.c.x),
 		3 / (tri.a.y + tri.b.y + tri.c.y),
 		3 / (tri.a.z + tri.b.z + tri.c.z),
-		1
-	};
-
-	return result;
-}
-
-vec3_t int_to_vec3(unsigned int a) {
-	vec3_t result = {
-		(num)((unsigned char)(a)),
-		(num)((unsigned char)(a >> 8)),
-		(num)((unsigned char)(a >> 16)),
 		1
 	};
 

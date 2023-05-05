@@ -26,12 +26,67 @@ void pixel_set_vec2(vec2_t x, unsigned int color) {
 	pixel_set((int) x.x, (int) x.y, color);
 }
 
+typedef struct {
+	num a, b, c;
+} z_t;
+
+typedef struct {
+	vec2_t a, b, c;
+} tri2_t;
+
+// https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+#define VEC2_DOT(_x, _y) \
+	((((_x).x) * ((_y).x)) + (((_x).x) * ((_y).x)))
+
+typedef struct {
+	num x, y, z, w;
+} vec3_t;
+
+typedef struct {
+	vec3_t a, b, c;
+	num intensity;
+} tri3_t;
+
+// this is a bit hacked together lol.
+num get_current_z(
+
+	// flat as in 2d would be flat in 3d.
+	tri2_t flat_tri,
+	vec2_t location,
+	z_t z
+) {
+	tri3_t tri = {
+		{ flat_tri.a.x, flat_tri.a.y, z.a, 1 },
+		{ flat_tri.b.x, flat_tri.b.y, z.b, 1 },
+		{ flat_tri.c.x, flat_tri.c.y, z.c, 1 },
+		1	
+	};
+
+	num det = (tri.b.y - tri.c.y) * (tri.a.x - tri.c.x) + (tri.c.x - tri.b.x) * (tri.a.y - tri.c.y);
+	num l1 = ((tri.b.y - tri.c.y) * (location.x - tri.c.x) + (tri.c.x - tri.b.x) * (location.y - tri.c.y)) / det;
+	num l2 = ((tri.c.y - tri.a.y) * (location.x - tri.c.x) + (tri.a.x - tri.c.x) * (location.y - tri.c.y)) / det;
+	num l3 = 1.0f - l1 - l2;
+	return l1 * tri.a.z + l2 * tri.b.z + l3 * tri.c.z;
+}
+
+vec3_t int_to_vec3(unsigned int a) {
+	vec3_t result = {
+		(num)((unsigned char)(a)),
+		(num)((unsigned char)(a >> 8)),
+		(num)((unsigned char)(a >> 16)),
+		1
+	};
+
+	return result;
+}
+
 void horiz_line(
 	num start_y,
 	num start_x,
 	num stop_x,
 	num *depth_buffer,
-	num w,
+	z_t z,
+	tri2_t tri,
 	unsigned int color
 ) {
 	if(start_x > stop_x) {
@@ -43,12 +98,49 @@ void horiz_line(
 	start_x--;
 	stop_x++;	
 	for(int i = (int) start_x; i < (int) stop_x; i++) {
-		if(w < depth_buffer[((int) start_y * SCREEN_WIDTH) + i]) {
+		vec2_t curr_location = { i, start_y };
+
+		num current_z = get_current_z(
+			tri,
+			curr_location,
+			z
+		);
+
+		num depth = current_z; /*(
+			(1 / current_z) - 
+			(1 / COMMON_Z_NEAR)
+		) / (
+			(1 / COMMON_Z_FAR) - 
+			(1 / COMMON_Z_NEAR)
+		);*/
+		
+		if(depth > depth_buffer[((int) start_y * SCREEN_WIDTH) + i]) {
 			continue;
 		}
-		
-		pixel_set(i, (int) start_y, color);
-		w = depth_buffer[((int) start_y * SCREEN_WIDTH) + i];
+
+		#ifndef COMMON_SHOW_DEPTH_BUFFER
+			pixel_set(i, (int) start_y, color);
+		#else
+			// vec3_t color_vec = int_to_vec3(color);
+			pixel_set(
+				i, 
+				(int) start_y, 
+				rgb(
+					(unsigned char)(depth * 255),// + color_vec.x), 
+					(unsigned char)(depth * 255),// + color_vec.y), 
+					(unsigned char)(depth * 255) // + color_vec.z)
+				)
+			);
+		#endif
+
+		if(
+			start_y >= 0 &&
+			start_y < SCREEN_HEIGHT &&
+			i >= 0 &&
+			i < SCREEN_WIDTH
+		) {
+			depth_buffer[((int) start_y * SCREEN_WIDTH) + i] = depth;		
+		}
 	}
 }
 
@@ -110,10 +202,6 @@ void line(
 
 	line_part(start, end, delta, decide, color);
 }
-
-typedef struct {
-	vec2_t a, b, c;
-} tri2_t;
 
 #define PRINT_TRI2(_x) \
 	printf("tri2_t\n"); \
@@ -209,7 +297,7 @@ void line_tri(tri2_t tri, unsigned int color) {
 void bottom_flat_tri_draw(
 	tri2_t tri, 
 	num *depth_buffer,
-	num w,
+	z_t z,
 	unsigned int color
 ) {
 	num inv_slope_1 = (tri.b.x - tri.a.x) / (tri.b.y - tri.a.y);
@@ -222,7 +310,8 @@ void bottom_flat_tri_draw(
 			(int) cur_x_1,
 			(int) cur_x_2 + 1,
 			depth_buffer,
-			w,
+			z,
+			tri,
 			color
 		);
 
@@ -234,7 +323,7 @@ void bottom_flat_tri_draw(
 void top_flat_tri_draw(
 	tri2_t tri,
 	num *depth_buffer,
-	num w,
+	z_t z,
 	unsigned int color
 ) {
 	num inv_slope_1 = (tri.a.x - tri.b.x) / (tri.a.y - tri.b.y);
@@ -247,7 +336,8 @@ void top_flat_tri_draw(
 			(int) cur_x_1,
 			(int) cur_x_2 + 1,
 			depth_buffer,
-			w,
+			z,
+			tri,
 			color
 		);
 
@@ -259,17 +349,17 @@ void top_flat_tri_draw(
 void tri_draw(
 	tri2_t bad_tri,
 	num *depth_buffer,
-	num w,
+	z_t z,
 	unsigned int color
 ) {
 	tri2_t tri = correct_tri(bad_tri);
 	if(tri.b.y == tri.c.y && tri.a.y < tri.b.y) {
-		bottom_flat_tri_draw(tri, depth_buffer, w, color);
+		bottom_flat_tri_draw(tri, depth_buffer, z, color);
 		return;
 	}
 
 	if(tri.b.y == tri.c.y && tri.a.y > tri.b.y) {
-		top_flat_tri_draw(tri, depth_buffer, w, color);
+		top_flat_tri_draw(tri, depth_buffer, z, color);
 		return;
 	}
 
@@ -296,8 +386,8 @@ void tri_draw(
 	};
 
 	#ifdef COMMON_FILL_TRI
-		bottom_flat_tri_draw(bottom_flat, depth_buffer, w, color);
-		top_flat_tri_draw(top_flat, depth_buffer, w, color);
+		bottom_flat_tri_draw(bottom_flat, depth_buffer, z, color);
+		top_flat_tri_draw(top_flat, depth_buffer, z, color);
 	#endif
 	
 	#ifdef COMMON_DEBUG_MODE

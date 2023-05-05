@@ -46,23 +46,17 @@ void handle_key_down() {
 	num speed = COMMON_SPEED_AMOUNT * frame_time;
 	vec3_t rot_inc_z = { 0, 0, -PI, 1  };
 	vec3_t temp_rot =  vec3_add(scene.camera_rot, rot_inc_z);
-	num rot_x_key = (-key_state[SDL_SCANCODE_K] + key_state[SDL_SCANCODE_I]) * speed;
-	vec3_t rot_x = { rot_x_key, 0, 0, 1 };
-	scene.camera_rot = vec3_add(scene.camera_rot, vec3_rot(rot_x, temp_rot));
 	num rot_y_key = (-key_state[SDL_SCANCODE_L] + key_state[SDL_SCANCODE_J]) * speed;
-	vec3_t rot_y = { 0, rot_y_key, 0, 1 };
-	scene.camera_rot = vec3_add(scene.camera_rot, vec3_rot(rot_y, temp_rot));
-	num rot_z_key = (-key_state[SDL_SCANCODE_O] + key_state[SDL_SCANCODE_U]) * speed;
-	vec3_t rot_z = { 0, 0, rot_z_key, 1 };
-	scene.camera_rot = vec3_add(scene.camera_rot, vec3_rot(rot_z, temp_rot));
 	num horiz_key = (-key_state[SDL_SCANCODE_A] + key_state[SDL_SCANCODE_D]) * speed;
-	vec3_t pos_x = { horiz_key, 0, 0, 1 };
-	scene.camera_pos = vec3_add(scene.camera_pos, vec3_rot(pos_x, temp_rot));
-	num vertical_key = (-key_state[SDL_SCANCODE_E] + key_state[SDL_SCANCODE_Q]) * speed;
-	vec3_t pos_y = { 0, vertical_key, 0, 1  };
-	scene.camera_pos = vec3_add(scene.camera_pos, vec3_rot(pos_y, temp_rot));
+	num vertical_key = (-key_state[SDL_SCANCODE_Q] + key_state[SDL_SCANCODE_E]) * speed;
 	num forward_key = (-key_state[SDL_SCANCODE_W] + key_state[SDL_SCANCODE_S]) * speed;
+	vec3_t rot_y = { 0, rot_y_key, 0, 1 };
+	vec3_t pos_x = { horiz_key, 0, 0, 1 };
+	vec3_t pos_y = { 0, vertical_key, 0, 1  };
 	vec3_t pos_z = { 0, 0, forward_key, 1 };
+	scene.camera_rot = vec3_add(scene.camera_rot, vec3_rot(rot_y, temp_rot));
+	scene.camera_pos = vec3_add(scene.camera_pos, vec3_rot(pos_x, temp_rot));
+	scene.camera_pos = vec3_add(scene.camera_pos, vec3_rot(pos_y, temp_rot));
 	scene.camera_pos = vec3_add(scene.camera_pos, vec3_rot(pos_z, temp_rot));
 	if(key_state[SDL_SCANCODE_R]) {
 		vec3_t zero = { 0, 0, 0, 1 };
@@ -85,7 +79,7 @@ void step_sdl() {
 	}
 
 	handle_key_down();
-	memset(depth_buffer, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(num));
+	memset(depth_buffer, (int) COMMON_Z_FAR, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(num));
 	memset(state.data, 0, SCREEN_WIDTH * SCREEN_HEIGHT * 4);
 	render();
 	SDL_UpdateTexture(
@@ -126,7 +120,7 @@ int main() {
 	#else
 		create_sdl();
 		scene = make_scene();
-		mesh_t obj_mesh = make_cube_mesh();
+		mesh_t obj_mesh = load_obj("mesh.obj");
 		obj_t obj = make_obj(&obj_mesh);
 		vec3_t obj_pos = { 0, 0, 3, 1 };
 		obj.pos = obj_pos;
@@ -163,6 +157,10 @@ int main() {
 		add_scene_light(&scene, &dir_light_top);
 		add_scene_light(&scene, &dir_light_left);
 		add_scene_light(&scene, &dir_light_forward);
+		vec3_t camera_pos = { 10, -3, -15, 1 };
+		vec3_t camera_rot = { 0, deg(135), 0, 1 };
+		scene.camera_pos = camera_pos;
+		scene.camera_rot = camera_rot;
 		while(!state.quit) {
 			step_sdl();
 		}

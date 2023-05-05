@@ -1,7 +1,13 @@
 nrast -> Nathans RASTerizer
 Very small software 3d renderer programmed in C (1.4k LOC).
 You will need SDL2, though, but that's about it (standard c library is needed, of course).
-Changing Z and Y rotations can make movement and rotation kind of weird.
+
+TODO:
+Depth buffer sometimes doesn't work. But it's a lot better than before.
+Everything is kinda "foggy" when you run it.
+This is because I have COMMON_SHOW_DEPTH_BUFFER on, this is for debugging purposes.
+Yup, I'm still debebugging, ugh, I'll get it working eventually.
+
 Controls
 	W - Move forward
 	A - Move left
@@ -9,10 +15,6 @@ Controls
 	D - Move right
 	E - Move down
 	Q - Move up
-	I - Look up
 	J - Look left
-	K - Look down
 	L - Look right
-	U - Spin clockwise
-	O - Spin counterclockwise
 	R - Reset camera position and rotation
