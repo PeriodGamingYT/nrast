@@ -1,13 +1,7 @@
 nrast -> Nathans RASTerizer
-Very small software 3d renderer programmed in C (1.4k LOC).
+Very small software 3d renderer programmed in C (1.5k LOC).
 You will need SDL2, though, but that's about it (standard c library is needed, of course).
-
-TODO:
-Depth buffer sometimes doesn't work. But it's a lot better than before.
-Everything is kinda "foggy" when you run it.
-This is because I have COMMON_SHOW_DEPTH_BUFFER on, this is for debugging purposes.
-Yup, I'm still debebugging, ugh, I'll get it working eventually.
-
+Please note there's probably going to be artifacts.
 Controls
 	W - Move forward
 	A - Move left
