@@ -2,7 +2,7 @@
 #define __PIXEL_H
 #include <stdio.h>
 #include <stdint.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include "common.h"
 #define ASSERT(x, ...) \
 	if(!(x)) { \
@@ -38,8 +38,6 @@ void pixel_set(int x, int y, unsigned int color) {
 		return;
 	}
 
-	// sdl2 starts from the bottom to the top.
-	// so setting y "upside down" is needed.
 	state.data[
 		y * SCREEN_WIDTH + x
 	] = color;

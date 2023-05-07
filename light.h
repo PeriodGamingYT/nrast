@@ -23,21 +23,19 @@ num compute_lighting(
 ) {
 	num intensity = 0;
 	for(int i = 0; i < lights_size; i++) {
-		switch(lights[i]->type) {
-			case DIRECTIONAL:
-				num light_length = vec3_length(lights[i]->pos);
-				vec3_t light_length_vec = { light_length, light_length, light_length, 1 };
-				vec3_t light_dir = vec3_mul(lights[i]->pos, light_length_vec);
-				intensity += CLAMP(0, 1, vec3_dot(normal, light_dir)) * lights[i]->intensity;
-				break;
-			
-			case AMBIENT:
-				intensity += lights[i]->intensity;
-				break;
+		if(lights[i]->type == DIRECTIONAL) {
+			num light_length = vec3_length(lights[i]->pos);
+			vec3_t light_length_vec = { light_length, light_length, light_length, 1 };
+			vec3_t light_dir = vec3_mul(lights[i]->pos, light_length_vec);
+			intensity += CLAMP(0, 1, vec3_dot(normal, light_dir)) * lights[i]->intensity;
+		}
+		
+		if(lights[i]->type == AMBIENT) {
+			intensity += lights[i]->intensity;
 		}
 	}
 
-	//intensity = CLAMP(0, 1, intensity);
+	intensity = CLAMP(0, 1, intensity);
 	return intensity;
 }
 
